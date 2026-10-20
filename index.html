@@ -335,6 +335,15 @@ label.f small{text-transform:none;letter-spacing:0;font-size:12px}
 .sheet{border-radius:14px 14px 0 0}
 .sheet h3{font-size:15px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;color:var(--teal)}
 .aviso{border-radius:12px;background:var(--amber-soft);color:var(--amber);font-weight:600}
+.espbox{position:relative;display:flex;flex-direction:column;gap:6px}
+.espbox .lbl{font-weight:700;font-size:14px}.espbox .lbl small{font-weight:400;color:var(--muted)}
+.espwrap{position:relative}.esprow{display:flex;gap:8px}
+.iares .btn.alt,.iares .btn.pri{text-transform:none;letter-spacing:0}.esprow input{flex:1;min-width:0}.esprow .btn{flex:none;width:48px;padding:0;display:grid;place-items:center}.esprow .btn svg{width:22px;height:22px}
+.espsel{font-size:13px;color:var(--muted)}.espsel:empty{display:none}.espsel b{color:var(--ink)}
+.esplista{position:absolute;left:0;right:0;top:100%;z-index:30;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);max-height:300px;overflow:auto;display:flex;flex-direction:column}
+.esplista button{flex:none;display:flex;align-items:center;gap:8px;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;color:var(--ink);font:inherit;min-height:48px;cursor:pointer}
+.esplista button:last-child{border-bottom:0}.esplista button.on,.esplista button:hover{background:var(--field)}
+.esplista .tx{flex:1;min-width:0;display:flex;flex-direction:column}.esplista small{color:var(--muted);font-size:12px}
 /* computador: tela larga, 4 indicadores por linha, gráficos lado a lado */
 @media (min-width:900px){
   main{max-width:1180px}
@@ -626,26 +635,342 @@ const RECEITAS=[
  {id:'sombra',nome:'Sombreamento',para:'queima de sol',preparo:'—',uso:'Volte à meia-sombra e exponha ao sol aos poucos.',fonte:'Materiais do projeto'},
  {id:'regar',nome:'Regar na medida',para:'falta de água',preparo:'—',uso:'Regue e diminua o intervalo de rega da espécie em Mais › Espécies.',fonte:'Materiais do projeto'}
 ];
-const CATALOGO=[
- {nome:'Pitangueira',cientifico:'Eugenia uniflora',familia:'Myrtaceae',luz:'Sol pleno',cuidados:'Sol pleno. Rega moderada, sem encharcar. Frutifica a partir do 2º ano e atrai pássaros.'},
- {nome:'Manacá-da-serra',cientifico:'Pleroma mutabile',familia:'Melastomataceae',luz:'Sol ou meia-sombra',cuidados:'Solo bem drenado e rico em matéria orgânica. Flores brancas, rosas e roxas na mesma planta.'},
- {nome:'Orelha-de-onça',cientifico:'Pleroma heteromallum',familia:'Melastomataceae',luz:'Sol pleno',cuidados:'Cerca-viva ou planta isolada. Flores roxas na primavera e no verão.'},
- {nome:'Gengibre-azul',cientifico:'Dichorisandra thyrsiflora',familia:'Commelinaceae',luz:'Sol ou meia-sombra',cuidados:'Flores azuis o ano todo. Cerca-viva ou planta isolada.'},
- {nome:'Primavera',cientifico:'Bougainvillea spectabilis',familia:'Nyctaginaceae',luz:'Sol pleno',cuidados:'Brácteas coloridas do outono à primavera. Gosta de sol e de pouca água depois de estabelecida.'},
- {nome:'Alamanda-amarela',cientifico:'Allamanda cathartica',familia:'Apocynaceae',luz:'Sol pleno',cuidados:'Trepadeira de flores amarelas. Precisa de apoio para subir.'},
- {nome:'Jasmim-cachorro',cientifico:'Tabernaemontana laeta',familia:'Apocynaceae',luz:'Sol ou meia-sombra',cuidados:'Arbusto de flores brancas perfumadas.'},
- {nome:'Planta-zebra',cientifico:'Goeppertia zebrina',familia:'Marantaceae',luz:'Meia-sombra',cuidados:'Folhagem listrada. Prefere ambiente úmido e sem sol direto.'},
- {nome:'Bromélia-imperial',cientifico:'Alcantarea imperialis',familia:'Bromeliaceae',luz:'Sol pleno',cuidados:'Mantenha água no copo central e troque toda semana para evitar mosquitos.'},
- {nome:'Helicônia-papagaio',cientifico:'Heliconia psittacorum',familia:'Heliconiaceae',luz:'Sol ou meia-sombra',cuidados:'Solo úmido e fértil. Floresce boa parte do ano.'},
- {nome:'Samambaia-americana',cientifico:'Nephrolepis exaltata',familia:'Nephrolepidaceae',luz:'Meia-sombra',cuidados:'Folhagem pendente. Substrato sempre úmido, sem encharcar.'},
- {nome:'Ipê-amarelo',cientifico:'Handroanthus ochraceus',familia:'Bignoniaceae',luz:'Sol pleno',cuidados:'Árvore de floração amarela no fim do inverno.'},
- {nome:'Ipê-roxo',cientifico:'Handroanthus impetiginosus',familia:'Bignoniaceae',luz:'Sol pleno',cuidados:'Árvore de floração rosa-arroxeada no inverno.'},
- {nome:'Ipê-verde',cientifico:'Cybistax antisyphilitica',familia:'Bignoniaceae',luz:'Sol pleno',cuidados:'Árvore de flores verde-claras.'},
- {nome:'Canafístula',cientifico:'Peltophorum dubium',familia:'Fabaceae',luz:'Sol pleno',cuidados:'Árvore de flores amarelas. Para áreas amplas.'},
- {nome:'Jatobá',cientifico:'Hymenaea courbaril',familia:'Fabaceae',luz:'Sol pleno',cuidados:'Árvore de grande porte e fruto comestível.'},
- {nome:'Tamboril',cientifico:'Enterolobium contortisiliquum',familia:'Fabaceae',luz:'Sol pleno',cuidados:'Árvore de grande porte. Para áreas amplas.'},
- {nome:'Buriti',cientifico:'Mauritia flexuosa',familia:'Arecaceae',luz:'Sol pleno',cuidados:'Palmeira de áreas úmidas. Exige bastante água.'}
+/* ============ CATÁLOGO DE ESPÉCIES ============
+   Nome popular | científico | família | luz | nativa do Brasil (1/0) | grupo | cuidados | outros nomes
+   luz: S=Sol pleno, SM=Sol ou meia-sombra, M=Meia-sombra, SO=Sombra
+   Fontes: catálogos do projeto (Vale do Ribeira, Arbustivas SP, Brasil Nativas, Horto Rizzini, Manual de jardinagem RJ) + compras do viveiro.
+   Textos resumidos com palavras próprias; confira sempre o nome científico com o fornecedor. */
+const LUZ_COD={S:'Sol pleno',SM:'Sol ou meia-sombra',M:'Meia-sombra',SO:'Sombra'};
+const CAT_RAW=`Pitangueira|Eugenia uniflora|Myrtaceae|S|1|frutifera|Rega moderada, sem encharcar. Frutifica a partir do 2º ano e atrai pássaros.|Pitanga
+Manacá-da-serra|Pleroma mutabile|Melastomataceae|SM|1|arvore|Solo drenado e rico em matéria orgânica. Flores brancas, rosas e roxas na mesma planta.|Tibouchina mutabilis
+Orelha-de-onça|Pleroma heteromallum|Melastomataceae|S|1|arbusto|Cerca-viva ou planta isolada. Flores roxas na primavera e no verão.|
+Gengibre-azul|Dichorisandra thyrsiflora|Commelinaceae|SM|1|herbacea|Flores azuis em boa parte do ano. Gosta de solo úmido e fértil.|Trapoeira-azul
+Primavera|Bougainvillea spectabilis|Nyctaginaceae|S|1|trepadeira|Brácteas coloridas do outono à primavera. Pouca água depois de estabelecida.|Buganvília, Bougainville
+Alamanda-amarela|Allamanda cathartica|Apocynaceae|S|1|trepadeira|Trepadeira de flores amarelas; precisa de apoio. Látex irrita a pele: use luvas.|Alamanda, Carolina
+Jasmim-cachorro|Tabernaemontana laeta|Apocynaceae|SM|1|arbusto|Arbusto de flores brancas perfumadas.|
+Planta-zebra|Goeppertia zebrina|Marantaceae|M|1|folhagem|Folhagem listrada. Ambiente úmido e sem sol direto.|Calathea zebrina
+Bromélia-imperial|Alcantarea imperialis|Bromeliaceae|S|1|bromelia|Mantenha água no copo central e troque toda semana para evitar mosquitos.|
+Helicônia-papagaio|Heliconia psittacorum|Heliconiaceae|SM|1|herbacea|Solo úmido e fértil. Floresce boa parte do ano.|Helicônia
+Samambaia-americana|Nephrolepis exaltata|Nephrolepidaceae|M|1|samambaia|Folhagem pendente. Substrato sempre úmido, sem encharcar.|
+Ipê-amarelo|Handroanthus ochraceus|Bignoniaceae|S|1|arvore|Floração amarela no fim do inverno, sem folhas.|
+Ipê-roxo|Handroanthus impetiginosus|Bignoniaceae|S|1|arvore|Floração rosa-arroxeada no inverno.|Tabebuia impetiginosa
+Ipê-verde|Cybistax antisyphilitica|Bignoniaceae|S|1|arvore|Árvore de flores verde-claras, rústica.|
+Canafístula|Peltophorum dubium|Fabaceae|S|1|arvore|Flores amarelas. Para áreas amplas.|
+Jatobá|Hymenaea courbaril|Fabaceae|S|1|frutifera|Grande porte e fruto comestível.|
+Tamboril|Enterolobium contortisiliquum|Fabaceae|S|1|arvore|Grande porte, raízes fortes. Para áreas amplas.|Orelha-de-macaco
+Buriti|Mauritia flexuosa|Arecaceae|S|1|palmeira|Palmeira de áreas úmidas. Exige bastante água.|
+Lírio-da-paz|Spathiphyllum wallisii|Araceae|SO|0|folhagem|Interior, luz indireta. Substrato úmido; murcha quando falta água e se recupera rápido.|Espatifilo, Spathiphyllum, Lírio da paz
+Peperômia|Peperomia spp.|Piperaceae|M|0|folhagem|Luz indireta. Regue só quando o substrato secar; folhas guardam água.|Peperomia variada
+Peperômia-melancia|Peperomia argyreia|Piperaceae|M|1|folhagem|Folhas listradas como melancia. Luz indireta e rega espaçada.|Peperomia melancia
+Bromélia-neoregélia|Neoregelia spp.|Bromeliaceae|SM|1|bromelia|Copo central com água limpa. Gosta de luz forte e substrato bem drenado.|Neoregelia
+Jiboia|Epipremnum aureum|Araceae|M|0|folhagem|Pendente ou trepadeira. Luz indireta; regue quando a superfície secar.|Jiboia verde, Pothos
+Vinca|Catharanthus roseus|Apocynaceae|S|0|flor|Floresce o ano todo no sol. Pouca água; não molhe as folhas.|Boa-noite, Maria-sem-vergonha-de-sol
+Rosa-do-deserto|Adenium obesum|Apocynaceae|S|0|suculenta|Sol pleno e substrato arenoso. Rega espaçada; no inverno quase nada.|Adenium
+Bambu-da-sorte|Dracaena sanderiana|Asparagaceae|SO|0|folhagem|Na água ou substrato. Troque a água toda semana, sem cloro de preferência.|Bambu da sorte, Dracena sanderiana
+Lírio|Lilium spp.|Liliaceae|SM|0|flor|Bulbosa. Substrato drenado; após a floração reduza a rega.|Lírio variado, Lilium
+Lisianto|Eustoma grandiflorum|Gentianaceae|S|0|flor|Flor de vaso ou corte. Sol e rega moderada; não encharcar.|Lisianthus
+Hipoestes|Hypoestes phyllostachya|Acanthaceae|M|0|folhagem|Folhas pintadas. Luz indireta clara e substrato úmido; belisque as pontas.|Planta-confete, Hypoestes
+Fitônia|Fittonia albivenis|Acanthaceae|SO|1|folhagem|Ama umidade e sombra. Murcha com falta de água e volta após a rega.|Fitonia, Fittonia
+Dracena-tricolor|Dracaena marginata|Asparagaceae|SM|0|folhagem|Rústica, pouca água. Bordas coloridas ficam mais vivas com luz.|Dracena-marginata
+Palmeira-triangular|Dypsis decaryi|Arecaceae|S|0|palmeira|Folhas em três fileiras. Sol e solo drenado.|
+Cróton|Codiaeum variegatum|Euphorbiaceae|SM|0|arbusto|Cores fortes com mais luz. Látex irritante.|Croton
+Rabo-de-gato|Acalypha reptans|Euphorbiaceae|SM|0|forracao|Forração de flores vermelhas em espiga. Rega regular.|
+Leia|Leea coccinea|Vitaceae|M|0|arbusto|Folhagem densa. Luz filtrada e substrato úmido.|Leia-verde
+Orquídea-bambu|Arundina graminifolia|Orchidaceae|S|0|flor|Orquídea terrestre de sol. Solo drenado com matéria orgânica.|Arundina
+Pingo-de-ouro|Duranta erecta|Verbenaceae|S|0|arbusto|Cerca-viva de folhas douradas. Podas frequentes mantêm a cor.|Duranta
+Lantana|Lantana camara|Verbenaceae|S|1|arbusto|Muito florífera e rústica. Atrai borboletas. Frutos tóxicos.|Camará, Cambará
+Pleomele|Dracaena reflexa|Asparagaceae|SM|0|arbusto|Folhagem ornamental de crescimento lento.|Dracena-pleomele
+Dracena-vermelha|Cordyline fruticosa|Asparagaceae|SM|0|arbusto|Folhas vermelhas. Solo úmido e drenado.|Cordiline
+Murta|Eugenia sprengelii|Myrtaceae|S|1|arbusto|Ótima para cerca-viva e topiaria. Aceita podas.|
+Tumbérgia-azul|Thunbergia erecta|Acanthaceae|SM|0|arbusto|Flores roxas o ano todo. Aceita poda de formação.|Tumbérgia-roxa
+Ixora|Ixora coccinea|Rubiaceae|S|0|arbusto|Prefere solo ácido. Floração em buquês o ano todo.|Ixora-mini, Ixória
+Grama-amendoim|Arachis repens|Fabaceae|SM|1|forracao|Forração de flores amarelas. Não aguenta pisoteio.|Amendoim-rasteiro, Arachis pintoi
+Falsa-érica|Cuphea gracilis|Lythraceae|SM|1|forracao|Forração de florinhas lilás o ano todo.|Cuféia, Érica
+Quaresmeira-rasteira|Heterocentron elegans|Melastomataceae|M|0|forracao|Forração de flores rosa. Solo úmido.|Schizocentron
+Vedélia|Sphagneticola trilobata|Asteraceae|S|1|forracao|Forração rústica de flores amarelas; espalha rápido.|Mal-me-quer
+Maranta|Goeppertia spp.|Marantaceae|M|1|folhagem|Folhagem desenhada. Umidade alta e sem sol direto.|Calathea
+Maranta-variegata|Ctenanthe oppenheimiana|Marantaceae|M|1|folhagem|Folhas listradas de rosa. Sombra e umidade.|Ctenanthe
+Maranta-pavão|Goeppertia makoyana|Marantaceae|SO|1|folhagem|Folhas desenhadas como penas. Muita umidade.|Calathea makoyana
+Grama-preta|Ophiopogon japonicus|Asparagaceae|SM|0|forracao|Forração baixa para bordaduras. Baixa manutenção.|Grama-japonesa
+Periquito|Alternanthera ficoidea|Amaranthaceae|S|1|forracao|Bordaduras coloridas; aceita poda baixa.|
+Comigo-ninguém-pode|Dieffenbachia spp.|Araceae|M|0|folhagem|Tóxica se ingerida. Luz indireta e rega moderada.|Dieffenbachia
+Amor-perfeito-de-verão|Torenia fournieri|Linderniaceae|M|0|flor|Floração no calor. Substrato úmido.|Amor-do-pará, Torênia
+Pileia|Pilea cadierei|Urticaceae|M|0|folhagem|Folhas prateadas. Luz indireta e umidade.|Planta-alumínio
+Dinheiro-em-penca|Callisia repens|Commelinaceae|M|1|forracao|Pendente ou forração. Rega moderada.|
+Bulbine|Bulbine frutescens|Asphodelaceae|S|0|suculenta|Suculenta de flores amarelas. Pouca água.|
+Russélia|Russelia equisetiformis|Plantaginaceae|S|0|arbusto|Ramos finos pendentes com flores vermelhas tubulares.|Russelia, Flor-de-coral
+Singônio|Syngonium angustatum|Araceae|M|0|folhagem|Luz difusa e solo úmido. Não tolera frio abaixo de 15 °C.|Syngonium
+Azulzinha|Evolvulus glomeratus|Convolvulaceae|S|1|forracao|Forração de flores azuis. Solo drenado.|Evolvulus
+Hera-roxa|Hemigraphis alternata|Acanthaceae|SM|0|forracao|Forração baixa; rega frequente.|
+Lambari-roxo|Tradescantia zebrina|Commelinaceae|M|0|forracao|Pendente ou forração. Cuidado com encharcamento.|Zebrina, Trapoeraba-zebra
+Rosinha-de-sol|Mesembryanthemum cordifolium|Aizoaceae|S|0|suculenta|Forração suculenta. Pouca água.|Aptenia
+Pinheiro-budista|Podocarpus macrophyllus|Podocarpaceae|SM|0|arbusto|Cerca-viva e topiaria. Crescimento lento.|Podocarpo
+Bromélia-vriésea|Vriesea spp.|Bromeliaceae|M|1|bromelia|Copo com água limpa. Luz filtrada.|Vriesea
+Helicônia|Heliconia spp.|Heliconiaceae|SM|1|herbacea|Solo úmido e fértil. Proteja do vento.|
+Alpínia|Alpinia purpurata|Zingiberaceae|M|0|herbacea|Inflorescência vermelha. Solo úmido e rico.|Gengibre-vermelho
+Colônia|Alpinia zerumbet|Zingiberaceae|SM|0|herbacea|Folhagem e flores perfumadas. Rústica.|Alpínia-zerumbet
+Bastão-do-imperador|Etlingera elatior|Zingiberaceae|SM|0|herbacea|Grande porte; solo úmido e muito fértil.|
+Bananeira-ornamental|Musa ornata|Musaceae|SM|0|herbacea|Touceira de flores rosadas. Solo úmido.|Bananinha
+Antúrio|Anthurium andraeanum|Araceae|M|0|flor|Luz indireta e substrato aerado. Umidade alta.|
+Acalifa|Acalypha wilkesiana|Euphorbiaceae|S|0|arbusto|Folhas coloridas. Rega regular.|Acalifa-vermelha
+Agave|Agave americana|Asparagaceae|S|0|suculenta|Muito rústica; espinhos nas pontas.|
+Azaleia|Rhododendron simsii|Ericaceae|SM|0|arbusto|Solo ácido e úmido. Floração no inverno.|
+Bananeira-de-jardim|Heliconia rostrata|Heliconiaceae|SM|1|herbacea|Inflorescência pendente. Solo úmido e fértil.|Helicônia-pendente
+Begônia-arbustiva|Begonia coccinea|Begoniaceae|M|1|arbusto|Flores vermelhas pendentes. Meia-sombra úmida.|Begônia
+Bico-de-papagaio|Euphorbia pulcherrima|Euphorbiaceae|S|0|arbusto|Brácteas vermelhas no inverno. Látex irritante.|Poinsétia
+Buxinho|Buxus sempervirens|Buxaceae|SM|0|arbusto|Topiaria e bordaduras. Crescimento lento.|Buxus
+Camarão-amarelo|Pachystachys lutea|Acanthaceae|SM|0|arbusto|Brácteas amarelas o ano todo.|
+Camarão-vermelho|Justicia brandegeeana|Acanthaceae|M|0|arbusto|Brácteas avermelhadas. Solo rico e regas constantes.|Camarão
+Clúsia|Clusia fluminensis|Clusiaceae|S|1|arbusto|Muito rústica, tolera maresia. Ótima para cerca-viva.|Abaneiro
+Dama-da-noite|Cestrum nocturnum|Solanaceae|SM|0|arbusto|Perfume forte à noite. Tóxica.|
+Escova-de-macaco|Combretum fruticosum|Combretaceae|S|1|trepadeira|Flores laranja em escova; atrai beija-flores.|
+Hibisco|Hibiscus rosa-sinensis|Malvaceae|S|0|arbusto|Floresce quase o ano todo. Aduba com frequência.|Mimo-de-vênus
+Malvavisco|Malvaviscus arboreus|Malvaceae|S|0|arbusto|Flores pendentes semifechadas; atrai beija-flores.|Hibisco-colibri
+Mussaenda|Mussaenda erythrophylla|Rubiaceae|SM|0|arbusto|Sépalas vermelhas vistosas. Solo fértil.|
+Ora-pro-nóbis|Pereskia aculeata|Cactaceae|S|1|trepadeira|Folhas comestíveis; espinhos. Muito rústica.|Ora-pro-nobis
+Palmeira-ráfis|Rhapis excelsa|Arecaceae|M|0|palmeira|Interior ou meia-sombra. Crescimento lento.|Palmeira-rápis
+Papo-de-peru|Aristolochia gigantea|Aristolochiaceae|SM|1|trepadeira|Flores grandes e curiosas. Precisa de suporte.|
+Viuvinha|Petrea volubilis|Verbenaceae|S|1|trepadeira|Cachos azul-lilás. Precisa de suporte.|Flor-de-são-miguel
+Sapatinho-de-judia|Thunbergia mysorensis|Acanthaceae|S|0|trepadeira|Cachos pendentes; ideal para pérgola.|
+Uva-rosa|Medinilla magnifica|Melastomataceae|M|0|arbusto|Umidade alta e luz filtrada.|Medinilla
+Gerânio|Pelargonium zonale|Geraniaceae|S|0|flor|Sol e pouca água. Retire flores secas.|
+Bela-emília|Plumbago auriculata|Plumbaginaceae|SM|0|arbusto|Flores azuis quase o ano todo. Aceita poda.|Plumbago, Jasmim-azul
+Moreia|Dietes bicolor|Iridaceae|S|0|herbacea|Baixa manutenção. Divida a touceira a cada 2 ou 3 anos.|Moréia-bicolor, Dietes
+Coração-roxo|Tradescantia pallida|Commelinaceae|S|0|forracao|Forração roxa muito rústica.|Trapoeraba-roxa
+Margaridão|Tithonia diversifolia|Asteraceae|S|0|arbusto|Cresce rápido e recupera solo. Aceita poda forte.|Girassol-mexicano
+Barba-de-serpente|Ophiopogon jaburan|Asparagaceae|SM|0|forracao|Baixa manutenção; bordaduras.|
+Brilhantina|Pilea microphylla|Urticaceae|M|1|forracao|Forração delicada; espalha por sementes.|
+Ripsális|Rhipsalis spp.|Cactaceae|M|1|suculenta|Cacto epífito pendente. Substrato de bromélia e luz filtrada.|Rhipsalis
+Flor-de-maio|Schlumbergera truncata|Cactaceae|M|1|suculenta|Cacto epífito. Floresce no outono; rega moderada.|Schlumbergera
+Onze-horas|Portulaca grandiflora|Portulacaceae|S|1|forracao|Flores abrem com o sol. Muito pouca água.|Portulaca
+Íris-da-praia|Trimezia northiana|Iridaceae|M|1|herbacea|Mudas nascem na ponta das folhas. Solo úmido.|Neomarica, Íris-neomarica
+Guaimbé|Thaumatophyllum bipinnatifidum|Araceae|SM|1|folhagem|Grande porte e folhas recortadas. Rústico.|Philodendron bipinnatifidum, Imbé
+Pacová|Philodendron martianum|Araceae|M|1|folhagem|Pecíolos grossos. Meia-sombra e solo úmido.|
+Filodendro-ondulato|Thaumatophyllum undulatum|Araceae|SM|1|folhagem|Folhas onduladas; porte arbustivo.|
+Maranta-tricolor|Stromanthe thalia 'Triostar'|Marantaceae|M|1|folhagem|Cultivar variegado. Umidade alta, sem sol direto.|Triostar, Calathea triostar
+Samambaia-paulistinha|Nephrolepis pectinata|Nephrolepidaceae|M|1|samambaia|Folhas pequenas e densas. Substrato úmido.|
+Avenca|Adiantum raddianum|Pteridaceae|SO|1|samambaia|Umidade constante; não deixe secar.|
+Sansão-do-campo|Mimosa caesalpiniifolia|Fabaceae|S|1|arvore|Cerca-viva espinhosa de crescimento rápido.|
+Açaí|Euterpe oleracea|Arecaceae|S|1|palmeira|Gosta de muita água. Touceira.|
+Juçara|Euterpe edulis|Arecaceae|M|1|palmeira|Palmito ameaçado. Sombra na fase jovem.|Palmito-juçara
+Jerivá|Syagrus romanzoffiana|Arecaceae|S|1|palmeira|Muito rústica; frutos atraem fauna.|Baba-de-boi
+Guriri|Allagoptera arenaria|Arecaceae|S|1|palmeira|Palmeira baixa de restinga; substrato arenoso.|
+Aroeira-pimenteira|Schinus terebinthifolia|Anacardiaceae|S|1|arvore|Pioneira rústica; frutos vermelhos.|Aroeira
+Baru|Dipteryx alata|Fabaceae|S|1|frutifera|Cerrado; castanha comestível.|
+Cagaita|Eugenia dysenterica|Myrtaceae|S|1|frutifera|Frutífera do Cerrado.|
+Camu-camu|Myrciaria dubia|Myrtaceae|S|1|frutifera|Áreas alagáveis; fruto rico em vitamina C.|
+Castanha-do-pará|Bertholletia excelsa|Lecythidaceae|S|1|frutifera|Grande porte; Amazônia.|
+Espinheira-santa|Monteverdia ilicifolia|Celastraceae|SM|1|arbusto|Folhas com espinhos na borda. Medicinal.|Maytenus ilicifolia
+Guapuruvu|Schizolobium parahyba|Fabaceae|S|1|arvore|Cresce muito rápido; pioneira.|
+Guatambu|Aspidosperma parvifolium|Apocynaceae|S|1|arvore|Crescimento lento; madeira nobre.|Peroba-da-praia
+Ipê-branco|Tabebuia roseoalba|Bignoniaceae|S|1|arvore|Floração branca e rápida no inverno.|
+Ipê-dourado|Handroanthus chrysotrichus|Bignoniaceae|S|1|arvore|Floração amarela; porte médio.|
+Ipê-do-brejo|Tabebuia cassinoides|Bignoniaceae|S|1|arvore|Áreas alagadas. Ameaçada de extinção.|Caxeta
+Jenipapo|Genipa americana|Rubiaceae|S|1|frutifera|Frutífera; tolera solo úmido.|
+Jequitibá-rosa|Cariniana legalis|Lecythidaceae|S|1|arvore|Grande porte; árvore longeva.|
+Oiti|Moquilea tomentosa|Chrysobalanaceae|S|1|arvore|Sombra densa; muito usada na arborização.|Licania tomentosa
+Paineira-rosa|Ceiba speciosa|Malvaceae|S|1|arvore|Tronco com acúleos; flores rosa no outono.|Paineira
+Pau-brasil|Paubrasilia echinata|Fabaceae|S|1|arvore|Ameaçada de extinção. Crescimento lento.|Caesalpinia echinata
+Pau-ferro|Libidibia ferrea|Fabaceae|S|1|arvore|Tronco manchado ornamental.|
+Quaresmeira|Pleroma granulosum|Melastomataceae|S|1|arvore|Floração roxa na quaresma.|Tibouchina granulosa
+Sangra-d'água|Croton urucurana|Euphorbiaceae|S|1|arvore|Pioneira de matas ciliares.|
+Sibipiruna|Cenostigma pluviosum|Fabaceae|S|1|arvore|Flores amarelas; arborização urbana.|
+Guabiroba|Campomanesia xanthocarpa|Myrtaceae|S|1|frutifera|Frutífera; atrai fauna.|Gabiroba
+Grumixama|Eugenia brasiliensis|Myrtaceae|SM|1|frutifera|Frutífera; muda mais viçosa à sombra.|
+Pitangão|Eugenia selloi|Myrtaceae|SM|1|frutifera|Frutífera ameaçada; muda gosta de sombra.|
+Cambuí|Myrciaria tenella|Myrtaceae|S|1|frutifera|Frutinhas pretas; porte pequeno.|
+Araçá|Psidium cattleianum|Myrtaceae|S|1|frutifera|Frutífera rústica de restinga.|Araçá-da-praia
+Guanandi|Calophyllum brasiliense|Calophyllaceae|S|1|arvore|Tolera solo encharcado.|
+Murici|Byrsonima sericea|Malpighiaceae|S|1|frutifera|Restinga; flores amarelas.|
+Ingá|Inga laurina|Fabaceae|S|1|frutifera|Cresce rápido; fruto doce.|Ingá-branco
+Pau-pombo|Tapirira guianensis|Anacardiaceae|S|1|arvore|Pioneira; frutos para pássaros.|
+Capororoca|Myrsine coriacea|Primulaceae|S|1|arvore|Pioneira; frutos para pássaros.|
+Bacupari|Garcinia brasiliensis|Clusiaceae|S|1|frutifera|Frutífera; germinação lenta.|
+Olho-de-cabra|Ormosia arborea|Fabaceae|S|1|arvore|Sementes vermelho e preto; escarificar para germinar.|
+Cebola-da-praia|Clusia lanceolata|Clusiaceae|SM|1|arbusto|Flores brancas de centro vinho. Restinga.|
+Camará-da-restinga|Lantana fucata|Verbenaceae|S|1|arbusto|Flores lilás; estaquia.|Arnica-da-restinga
+Comandaíba|Sophora tomentosa|Fabaceae|S|1|arbusto|Restinga; flores amarelas; tolera maresia.|
+Ipomeia-rosa|Ipomoea pes-caprae|Convolvulaceae|S|1|forracao|Fixa areia de praia; estolões.|Pé-de-cabra, Salsa-da-praia
+Feijão-da-praia|Canavalia rosea|Fabaceae|S|1|forracao|Rasteira de restinga; flores rosa.|
+Erva-capitão|Hydrocotyle bonariensis|Araliaceae|S|1|forracao|Forração de folhas redondas; restinga.|
+Cipó-rosa|Fridericia conjugata|Bignoniaceae|S|1|trepadeira|Flores rosa; atenção a ácaros na muda.|
+Jarrinha|Aristolochia trilobata|Aristolochiaceae|M|1|trepadeira|Flores curiosas; lagartas atacam a muda.|Jarrinha-da-praia
+Cacto-palmatória|Opuntia monacantha|Cactaceae|S|1|suculenta|Estaquia por palma; enraíza em 30 dias.|
+Fedegoso|Senna appendiculata|Fabaceae|S|1|arbusto|Flores amarelas; restinga.|
+Canudo-de-pito|Senna pendula|Fabaceae|S|1|arbusto|Flores amarelas no outono.|
+Embaúba|Cecropia pachystachya|Urticaceae|S|1|arvore|Pioneira de crescimento rápido; atrai fauna.|
+Cambuci|Campomanesia phaea|Myrtaceae|SM|1|frutifera|Frutífera da Mata Atlântica; fruto em forma de disco.|
+Jabuticabeira|Plinia cauliflora|Myrtaceae|S|1|frutifera|Frutos no tronco. Rega generosa.|Jabuticaba
+Uvaia|Eugenia pyriformis|Myrtaceae|S|1|frutifera|Frutífera de fruto amarelo e ácido.|
+Cereja-do-rio-grande|Eugenia involucrata|Myrtaceae|S|1|frutifera|Frutífera de porte pequeno.|
+Costela-de-adão|Monstera deliciosa|Araceae|M|0|folhagem|Folhas recortadas. Luz indireta.|Monstera
+Zamioculca|Zamioculcas zamiifolia|Araceae|SO|0|folhagem|Muito resistente; rega bem espaçada.|Zamioculcas
+Espada-de-são-jorge|Dracaena trifasciata|Asparagaceae|SM|0|suculenta|Rega rara; tolera sombra.|Sansevieria
+Maranta-charuto|Calathea lutea|Marantaceae|SM|1|herbacea|Grande porte; folhas cerosas. Solo úmido.|
+Singônio-rosa|Syngonium podophyllum|Araceae|M|0|folhagem|Luz difusa e umidade.|
+Orquídea-phalaenopsis|Phalaenopsis spp.|Orchidaceae|M|0|flor|Substrato de casca; rega quando secar.|Orquídea-borboleta
+Kalanchoe|Kalanchoe blossfeldiana|Crassulaceae|S|0|suculenta|Floração duradoura; pouca água.|Flor-da-fortuna
+Suculenta|Echeveria spp.|Crassulaceae|S|0|suculenta|Sol e substrato arenoso. Rega espaçada.|
+Cacto|Cactaceae spp.|Cactaceae|S|0|suculenta|Sol e pouca água.|
+Begônia|Begonia spp.|Begoniaceae|M|0|flor|Não molhe as folhas; substrato úmido.|
+Mini-rosa|Rosa spp.|Rosaceae|S|0|flor|Sol pleno; adubação frequente; atenção a pinta-preta.|Rosa, Roseira
+Crisântemo|Chrysanthemum morifolium|Asteraceae|S|0|flor|Vaso ou corte. Rega regular.|
+Violeta-africana|Saintpaulia ionantha|Gesneriaceae|M|0|flor|Não molhe as folhas; luz indireta.|Violeta
+Grama-esmeralda|Zoysia japonica|Poaceae|S|0|gramado|Sol pleno; cortes regulares.|Zoysia
+Grama-são-carlos|Axonopus compressus|Poaceae|SM|1|gramado|Tolera meia-sombra.|
+Grama-inglesa|Stenotaphrum secundatum|Poaceae|SM|1|gramado|Tolera salinidade; adubação semestral.|Grama-santo-agostinho
+Acerola|Malpighia emarginata|Malpighiaceae|S|0|frutifera|Produz o ano todo no calor. Rega regular na frutificação; aceita poda.|Aceroleira
+Jambu|Acmella oleracea|Asteraceae|SM|1|hortalica|Erva amazônica do tacacá e do pato no tucupi. Solo úmido e rico; colha os ramos com flor.|Agrião-do-pará, Agrião-do-norte
+Jambo-vermelho|Syzygium malaccense|Myrtaceae|S|0|frutifera|Árvore de fruto vermelho; gosta de calor e umidade.|Jambeiro, Jambo
+Goiabeira|Psidium guajava|Myrtaceae|S|1|frutifera|Rústica e produtiva. Poda após a colheita.|Goiaba
+Araçá-boi|Eugenia stipitata|Myrtaceae|SM|1|frutifera|Amazônica; fruto ácido e perfumado. Solo úmido.|
+Cacau|Theobroma cacao|Malvaceae|M|1|frutifera|Precisa de sombra na fase jovem e solo úmido e fértil.|Cacaueiro
+Cupuaçu|Theobroma grandiflorum|Malvaceae|SM|1|frutifera|Amazônico; sombra parcial quando jovem.|Cupuaçuzeiro
+Cajueiro|Anacardium occidentale|Anacardiaceae|S|1|frutifera|Muito rústico; tolera solo arenoso e seca.|Caju
+Cajá|Spondias mombin|Anacardiaceae|S|1|frutifera|Árvore grande; fruto amarelo e ácido.|Taperebá
+Umbu|Spondias tuberosa|Anacardiaceae|S|1|frutifera|Caatinga; raízes guardam água. Pouca rega.|Umbuzeiro
+Mangaba|Hancornia speciosa|Apocynaceae|S|1|frutifera|Cerrado e restinga; solo arenoso e drenado.|Mangabeira
+Pequi|Caryocar brasiliense|Caryocaraceae|S|1|frutifera|Cerrado; crescimento lento.|Pequizeiro
+Bacuri|Platonia insignis|Clusiaceae|S|1|frutifera|Amazônico; crescimento lento.|
+Araticum|Annona crassiflora|Annonaceae|S|1|frutifera|Cerrado; germinação lenta.|Marolo
+Graviola|Annona muricata|Annonaceae|S|0|frutifera|Calor e umidade; adubação orgânica.|
+Pitaia|Selenicereus undatus|Cactaceae|S|0|frutifera|Cacto trepador; precisa de tutor.|Pitaya, Fruta-do-dragão
+Maracujá|Passiflora edulis|Passifloraceae|S|1|frutifera|Trepadeira; precisa de espaldeira.|Maracujazeiro
+Amora|Morus nigra|Moraceae|S|0|frutifera|Cresce rápido; aceita poda forte.|Amoreira
+Mangueira|Mangifera indica|Anacardiaceae|S|0|frutifera|Grande porte; pouca água na floração.|Manga
+Abacateiro|Persea americana|Lauraceae|S|0|frutifera|Solo bem drenado; não tolera encharcamento.|Abacate
+Jaqueira|Artocarpus heterophyllus|Moraceae|S|0|frutifera|Grande porte; frutos muito pesados.|Jaca
+Limoeiro|Citrus × latifolia|Rutaceae|S|0|frutifera|Adubação regular; atenção a cochonilhas.|Limão-taiti, Limão
+Laranjeira|Citrus sinensis|Rutaceae|S|0|frutifera|Adubação regular; atenção a pragas dos citros.|Laranja
+Mamoeiro|Carica papaya|Caricaceae|S|0|frutifera|Cresce rápido; não tolera encharcamento.|Mamão
+Bananeira|Musa spp.|Musaceae|S|0|frutifera|Solo úmido e rico; retire filhotes em excesso.|Banana
+Cambucá|Plinia edulis|Myrtaceae|SM|1|frutifera|Mata Atlântica, ameaçada; crescimento lento.|
+Grumixama-branca|Eugenia brasiliensis 'Branca'|Myrtaceae|SM|1|frutifera|Variedade de fruto claro.|
+Chicória-do-pará|Eryngium foetidum|Apiaceae|M|1|hortalica|Tempero amazônico; meia-sombra e solo úmido.|Coentro-do-pará, Chicória
+Alfavaca|Ocimum campechianum|Lamiaceae|S|1|hortalica|Erva aromática; belisque as flores.|Alfavaca-de-caboclo`;
+const CATALOGO=CAT_RAW.split('\n').map(l=>{const[nome,cientifico,familia,lz,nat,grupo,cuidados,alias]=l.split('|');
+  return {nome,cientifico,familia,luz:LUZ_COD[lz]||'',nativa:nat==='1',grupo,cuidados,alias:alias||''}});
+const GRUPOS={arvore:'Árvore',arbusto:'Arbusto',palmeira:'Palmeira',trepadeira:'Trepadeira',forracao:'Forração',folhagem:'Folhagem',flor:'Flor de vaso',bromelia:'Bromélia',samambaia:'Samambaia',frutifera:'Frutífera',hortalica:'Hortaliça/erva',suculenta:'Suculenta/cacto',herbacea:'Herbácea',gramado:'Gramado'};
+
+/* compras que já vieram nos cupons (preço pago = custo por muda) */
+const COMPRAS_INICIAIS=[
+ {nome:'Lírio-da-paz',compras:[{desc:'Pote 11',preco:11.9,qtd:2,data:'2026-10-18',pag:'Dinheiro'},{desc:'Pote 13 com flor',preco:16.9,qtd:3,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Peperômia',compras:[{desc:'Pote 12 variada',preco:8.9,qtd:3,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Bromélia-neoregélia',compras:[{desc:'Pote 14',preco:4.9,qtd:12,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Jiboia',compras:[{desc:'Cuia 13 pendente',preco:13.5,qtd:8,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Vinca',compras:[{desc:'Pote 11 (preço a conferir)',preco:4.9,qtd:1,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Rosa-do-deserto',compras:[{desc:'(preço a conferir)',preco:3.9,qtd:1,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Bambu-da-sorte',compras:[{desc:'Longo',preco:8,qtd:1,data:'2026-10-18',pag:'Dinheiro'}]},
+ {nome:'Lírio',compras:[{desc:'Pote 15 variado',preco:25,qtd:1,pag:'Cartão de crédito'}]},
+ {nome:'Peperômia-melancia',compras:[{desc:'Cuia 13',preco:10,qtd:1,pag:'Cartão de crédito'}]},
+ {nome:'Lisianto',compras:[{desc:'Pote 13',preco:15,qtd:2,pag:'Cartão de crédito'}]},
+ {nome:'Hipoestes',compras:[{desc:'Cuia 8',preco:5,qtd:12,pag:'Cartão de crédito'}]},
+ {nome:'Fitônia',compras:[{desc:'Cuia 21 folha larga verde',preco:20,qtd:1,pag:'Cartão de crédito'}]}
 ];
+
+/* busca sem acento por nome popular, científico e outros nomes */
+const normBusca=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[-_]+/g,' ').replace(/\s+/g,' ');
+function buscarEspecies(q,{limite=12}={}){
+  const t=normBusca(q).trim();const cad=ativos(S.especies);
+  const pont=(nome,cient,alias)=>{if(!t)return 1;const n=normBusca(nome),c=normBusca(cient),a=normBusca(alias);
+    if(n.startsWith(t))return 100;if(n.split(' ').some(w=>w.startsWith(t)))return 80;if(c.startsWith(t))return 70;
+    if(a.split(/,\s*/).some(w=>w.startsWith(t)))return 60;if(n.includes(t))return 50;if(c.includes(t)||a.includes(t))return 40;return 0};
+  const r=[];
+  for(const e of cad){const p=pont(e.nome,e.cientifico,e.alias);if(p)r.push({tipo:'cad',e,p:p+5})}
+  for(const c of CATALOGO){if(cad.some(e=>(c.cientifico&&e.cientifico===c.cientifico)||normBusca(e.nome)===normBusca(c.nome)))continue;
+    const p=pont(c.nome,c.cientifico,c.alias);if(p)r.push({tipo:'cat',c,p})}
+  return r.sort((a,b)=>b.p-a.p||(a.tipo===b.tipo?0:a.tipo==='cad'?-1:1)||(a.e||a.c).nome.localeCompare((b.e||b.c).nome)).slice(0,limite);
+}
+function catalogoPor(cient,nome){const c=normBusca(cient).replace(/\s+spp?\.?$/,''),n=normBusca(nome);
+  return CATALOGO.find(x=>c&&normBusca(x.cientifico).replace(/\s+spp?\.?$/,'')===c)||CATALOGO.find(x=>n&&(normBusca(x.nome)===n||normBusca(x.alias).split(/,\s*/).includes(n)))}
+function comprasDe(e){let cs=(e&&e.compras)||[];if(typeof cs==='string'){try{cs=JSON.parse(cs)}catch(x){cs=[]}}return Array.isArray(cs)?cs:[]}
+function compraDe(e){const cs=comprasDe(e);return cs.length?cs[cs.length-1]:null}
+function custoPadraoDe(e){if(!e)return '';if(e.custoPadrao!==''&&e.custoPadrao!=null)return num(e.custoPadrao);const c=compraDe(e);return c?num(c.preco):''}
+
+/* cria a espécie a partir do catálogo (com sigla) */
+async function especieDoCatalogo(c,extra={}){
+  const e={id:uid(),nome:c.nome,cientifico:c.cientifico||'',familia:c.familia||'',luz:c.luz||'',cuidados:c.cuidados||'',tempoProducao:'',precoVenda:'',
+    intervaloRega:'',intervaloAdubacao:'',nativa:c.nativa===undefined?'':(c.nativa?'sim':'não'),grupo:c.grupo||'',custoPadrao:'',compras:[],...extra};
+  e.sigla=sugerirSigla(e.nome,e.id);await salvar('especies',e);return e}
+
+/* semeia uma vez as espécies dos cupons de compra */
+async function semearCompras(){
+  if(S.cfg.comprasSemeadas)return;
+  for(const x of COMPRAS_INICIAIS){const c=CATALOGO.find(k=>k.nome===x.nome);if(!c)continue;
+    let e=ativos(S.especies).find(s=>!s.exemplo&&(s.cientifico===c.cientifico||normBusca(s.nome)===normBusca(c.nome)));
+    if(e){e.compras=[...comprasDe(e),...x.compras];if(e.custoPadrao===''||e.custoPadrao==null)e.custoPadrao=x.compras[0].preco;await salvar('especies',e)}
+    else await especieDoCatalogo(c,{compras:x.compras,custoPadrao:x.compras[0].preco})}
+  S.cfg.comprasSemeadas=true;await salvarCfg();
+}
+
+/* ---- campo de espécie com busca por letras ---- */
+function htmlCampoEspecie(sel){const e=sel?especiePor(sel):null;
+  return `<div class="f espbox"><span class="lbl">Espécie</span>
+    <div class="espwrap"><div class="esprow"><input id="espQ" type="search" autocomplete="off" placeholder="Digite: pit, jib, lírio…" value="${e?esc(e.nome):''}" aria-autocomplete="list" aria-controls="espLista">
+    <button type="button" class="btn sm" id="espFoto" title="Identificar pela foto">${ic('foto')}</button></div>
+    <input type="hidden" name="especieId" value="${e?e.id:''}">
+    <div id="espLista" class="esplista" role="listbox" hidden></div></div>
+    <div id="espSel" class="espsel">${e?resumoEspecie(e):''}</div>
+    <input type="file" id="espArq" accept="image/*" capture="environment" hidden>
+    <div id="espIA"></div></div>`}
+function resumoEspecie(e){const cp=custoPadraoDe(e);
+  return `<b>${esc(e.nome)}</b>${e.cientifico?` · <i>${esc(e.cientifico)}</i>`:''}${e.familia?` · ${esc(e.familia)}`:''}${e.nativa==='sim'?' <span class="pill ok">nativa</span>':''}${cp!==''?` <span class="pill">custo ${brl(cp)}</span>`:''}`}
+function ligarCampoEspecie(bg,{aoEscolher}={}){
+  const q=$('#espQ',bg),lista=$('#espLista',bg),hid=$('input[name=especieId]',bg),selBox=$('#espSel',bg);
+  let itens=[],ativo=-1;
+  const escolher=async r=>{let e=r.e;if(r.tipo==='cat'){e=await especieDoCatalogo(r.c);toast(e.nome+' adicionada às suas espécies')}
+    else if(r.tipo==='nova'){const nome=r.nome.trim();if(!nome)return;const c=catalogoPor('',nome);
+      e=c?await especieDoCatalogo(c):await especieDoCatalogo({nome:nome[0].toUpperCase()+nome.slice(1)});toast('Espécie criada: '+e.nome)}
+    hid.value=e.id;q.value=e.nome;selBox.innerHTML=resumoEspecie(e);lista.hidden=true;aoEscolher&&aoEscolher(e)};
+  const pintar=()=>{const t=q.value.trim();itens=buscarEspecies(t,{limite:t?12:8});ativo=-1;
+    const nova=t&&!itens.some(r=>normBusca((r.e||r.c).nome)===normBusca(t));
+    lista.innerHTML=itens.map((r,i)=>{const x=r.e||r.c;const cp=r.e?custoPadraoDe(r.e):'';
+      return `<button type="button" role="option" data-i="${i}"><span class="tx"><strong>${esc(x.nome)}</strong><small>${esc(x.cientifico||'')}${x.familia?' · '+esc(x.familia):''}${GRUPOS[x.grupo]?' · '+GRUPOS[x.grupo]:''}</small></span>
+      ${r.tipo==='cad'?`<span class="pill ok">sua${cp!==''?' · '+brl(cp):''}</span>`:`<span class="pill">${(x.nativa===true)?'nativa · ':''}catálogo</span>`}</button>`}).join('')
+      +(nova?`<button type="button" data-nova="1"><span class="tx"><strong>+ Cadastrar “${esc(t)}”</strong><small>Espécie nova, você completa depois</small></span></button>`:'')
+      +(!itens.length&&!nova?'<div class="muted" style="padding:10px">Digite o nome</div>':'');
+    lista.hidden=false;
+    $$('[data-i]',lista).forEach(b=>b.onmousedown=b.onclick=ev=>{ev.preventDefault();escolher(itens[+b.dataset.i])});
+    const bn=$('[data-nova]',lista);if(bn)bn.onmousedown=bn.onclick=ev=>{ev.preventDefault();escolher({tipo:'nova',nome:t})}};
+  q.oninput=()=>{hid.value='';selBox.innerHTML='';pintar()};
+  q.onfocus=()=>{if(!hid.value)pintar()};
+  q.onblur=()=>setTimeout(()=>{lista.hidden=true},180);
+  q.onkeydown=ev=>{const bs=$$('button',lista);if(!bs.length)return;
+    if(ev.key==='ArrowDown'||ev.key==='ArrowUp'){ev.preventDefault();ativo=(ativo+(ev.key==='ArrowDown'?1:-1)+bs.length)%bs.length;bs.forEach((b,i)=>b.classList.toggle('on',i===ativo))}
+    else if(ev.key==='Enter'){ev.preventDefault();(bs[ativo>=0?ativo:0]).click()}};
+  // identificar pela foto
+  const arq=$('#espArq',bg),out=$('#espIA',bg);
+  $('#espFoto',bg).onclick=()=>{if(!iaPronta()){toast('Configure o Gemini na engrenagem › Assistente de IA');return}arq.click()};
+  arq.onchange=async()=>{const f=arq.files[0];if(!f)return;out.innerHTML='<div class="iares"><p>Identificando a planta…</p></div>';
+    try{const d=await iaIdentificarEspecie(f);out.innerHTML=htmlIdentificacao(d);
+      $$('[data-idx]',out).forEach(b=>b.onclick=async()=>{const k=+b.dataset.idx;const op=k<0?d:d.alternativas[k];
+        const c=catalogoPor(op.cientifico,op.nomePopular);
+        let e=ativos(S.especies).find(s=>(op.cientifico&&normBusca(s.cientifico)===normBusca(op.cientifico))||(c&&s.cientifico===c.cientifico));
+        if(e)await escolher({tipo:'cad',e});
+        else if(c)await escolher({tipo:'cat',c});
+        else{const ne=await especieDoCatalogo({nome:op.nomePopular,cientifico:op.cientifico||'',familia:op.familia||'',luz:LUZ_COD[op.luz]||op.luz||'',cuidados:op.cuidados||'',nativa:op.nativaBrasil===true?true:op.nativaBrasil===false?false:undefined});
+          await escolher({tipo:'cad',e:ne});toast('Espécie criada pela foto. Confira os dados em Mais › Espécies')}
+        out.innerHTML=''})}
+    catch(e){out.innerHTML=`<div class="aviso">${esc(e.message)}</div>`}finally{arq.value=''}};
+}
+async function iaIdentificarEspecie(foto){
+  const lista=CATALOGO.map(c=>`${c.nome} (${c.cientifico})`).join('; ');
+  const suas=ativos(S.especies).map(e=>`${e.nome}${e.cientifico?' ('+e.cientifico+')':''}`).join('; ');
+  return gemini({imagem:foto,json:true,sistema:'Você é um botânico que identifica plantas ornamentais e nativas vendidas em viveiros no Brasil. Responda em português do Brasil.',
+    texto:`Identifique a espécie da planta na foto. Se ela estiver nesta lista, use exatamente o nome popular e científico da lista.
+Espécies que o viveiro já tem: ${suas||'nenhuma'}
+Catálogo do viveiro: ${lista}
+Se não tiver certeza, diga confiança baixa e dê alternativas. Para nativaBrasil use true só se a espécie ocorre naturalmente no Brasil.
+Responda SOMENTE um JSON: {"nomePopular":"","cientifico":"","familia":"","confianca":"baixa|média|alta","nativaBrasil":true|false|null,"luz":"Sol pleno|Sol ou meia-sombra|Meia-sombra|Sombra","cuidados":"uma frase curta","porque":"traços da foto que levaram à identificação","alternativas":[{"nomePopular":"","cientifico":"","familia":""}]}`});
+}
+function htmlIdentificacao(d){const alts=(d.alternativas||[]).slice(0,3);
+  return `<div class="iares"><div class="iacab"><b>${esc(d.nomePopular||'Não identificada')}</b><span class="pill ${d.confianca==='alta'?'ok':d.confianca==='média'?'warn':'bad'}">confiança ${esc(d.confianca||'?')}</span></div>
+  <p><i>${esc(d.cientifico||'')}</i>${d.familia?' · '+esc(d.familia):''}${d.nativaBrasil===true?' · nativa do Brasil':d.nativaBrasil===false?' · exótica':''}</p>
+  ${d.porque?`<p class="muted">${esc(d.porque)}</p>`:''}
+  ${d.nomePopular?`<button type="button" class="btn pri sm" data-idx="-1">Usar ${esc(d.nomePopular)}</button>`:''}
+  ${alts.length?`<p class="muted" style="margin-top:4px">Ou pode ser: ${alts.map(a=>esc(a.nomePopular)+(a.cientifico?' (<i>'+esc(a.cientifico)+'</i>)':'')).join(', ')}</p><div class="row" style="flex-wrap:wrap">${alts.map((a,i)=>`<button type="button" class="btn sm alt" data-idx="${i}">${esc(a.nomePopular)}</button>`).join('')}</div>`:''}
+  <p class="muted" style="font-size:12px">Sugestão do Gemini. Confira antes de imprimir etiquetas.</p></div>`}
+
 const probPor=id=>BIBLIO.find(b=>b.id===id);
 const receitaPor=id=>RECEITAS.find(r=>r.id===id);
 function nomeProblema(o){return probPor(o.problemaId)?.nome||o.problemaNome||'Problema'}
@@ -1320,22 +1645,30 @@ function formLote(it){
   const novo=!it;it=it||{};
   const ehLote=novo||it.tipo==='lote';
   folha(`<form><h3>${novo?'Novo lote':'Editar '+TIPO_ITEM[it.tipo].toLowerCase()+' '+esc(it.codigo)}</h3>
-    ${ehLote?`<label class="f">Espécie<select name="especieId" required><option value="">Escolha…</option>${opcoesEspecies(it.especieId)}<option value="__nova">+ Cadastrar nova espécie</option></select></label>
-    <div id="novaEsp" hidden class="f2"><label class="f">Nome popular<input name="nEsp" placeholder="Ex.: Pitangueira"></label><label class="f">Nome científico<input name="nCient" placeholder="Ex.: Eugenia uniflora"></label></div>`:''}
+    ${ehLote?htmlCampoEspecie(it.especieId):''}
     ${novo?`<div class="f2"><label class="f">Quantidade<input name="qtd" type="number" inputmode="numeric" min="1" required></label>
       <label class="f">Data de entrada<input name="dataEntrada" type="date" value="${hoje()}" required></label></div>`
      :`<div class="f2"><label class="f">Data de entrada<input name="dataEntrada" type="date" value="${esc(it.dataEntrada)}"></label><label class="f">Data de saída<input name="dataSaida" type="date" value="${esc(it.dataSaida||'')}"></label></div>`}
     <label class="f">Local<input name="local" value="${esc(it.local||'')}" placeholder="Ex.: Estufa 1, bancada 3"></label>
     ${ehLote?`<label class="f">Origem<select name="origem">${['','Semente','Estaca','Divisão de touceira','Alporquia','Compra de muda','Doação'].map(o=>`<option ${o===(it.origem||'')?'selected':''}>${o}</option>`).join('')}</select></label>`:''}
+    <div id="compChips" class="row" style="flex-wrap:wrap"></div>
     <div class="f2"><label class="f">Custo por muda (R$)<input name="custoUnit" inputmode="decimal" value="${it.custoUnit??''}" placeholder="${novo?'0,00':'herda: '+custoDe(it).toFixed(2)}"></label>
     <label class="f">Preço de venda (R$)<input name="precoVenda" inputmode="decimal" value="${it.precoVenda??''}" placeholder="padrão da espécie"></label></div>
     <label class="f">Observações<textarea name="obs">${esc(it.obs||'')}</textarea></label>
     ${rodapeForm(novo?'Criar lote':'Salvar')}</form>`,{
-    onOpen:(bg)=>{const s=$('select[name=especieId]',bg);if(s)s.onchange=()=>{$('#novaEsp',bg).hidden=s.value!=='__nova'}},
+    onOpen:(bg)=>{if(!ehLote)return;const f=$('form',bg);
+      const chips=e=>{const cs=comprasDe(e);const box=$('#compChips',bg);
+        box.innerHTML=cs.length>1?`<span class="muted" style="font-size:13px;width:100%">Custo da compra:</span>`+cs.map((c,i)=>`<button type="button" class="btn sm" data-cp="${i}">${esc(c.desc||'compra')} · ${brl(c.preco)}</button>`).join(''):'';
+        $$('[data-cp]',box).forEach(b=>b.onclick=()=>{f.custoUnit.value=num(cs[+b.dataset.cp].preco).toFixed(2).replace('.',',');if(!f.origem.value)f.origem.value='Compra de muda'})};
+      ligarCampoEspecie(bg,{aoEscolher:e=>{const cp=custoPadraoDe(e);
+        if(novo&&(!f.custoUnit.value||f.custoUnit.dataset.auto)){f.custoUnit.value=cp!==''?num(cp).toFixed(2).replace('.',','):'';f.custoUnit.dataset.auto=cp!==''?'1':'';
+          if(comprasDe(e).length&&(!f.origem.value||f.origem.dataset.auto)){f.origem.value='Compra de muda';f.origem.dataset.auto='1'}}
+        chips(e);if(f.qtd&&!f.qtd.value)f.qtd.focus()}});
+      f.custoUnit.addEventListener('input',()=>{f.custoUnit.dataset.auto=''});f.origem.addEventListener('change',()=>{f.origem.dataset.auto=''});
+      const e0=especiePor(it.especieId);if(e0)chips(e0)},
     onSubmit:async(fd)=>{
       let especieId=fd.get('especieId');
-      if(especieId==='__nova'){const nome=String(fd.get('nEsp')||'').trim();if(!nome){toast('Escreva o nome da nova espécie');return false}
-        const e={id:uid(),nome,cientifico:String(fd.get('nCient')||'').trim(),familia:'',cuidados:'',tempoProducao:'',precoVenda:''};await salvar('especies',e);especieId=e.id}
+      if(ehLote&&!especiePor(especieId)){toast('Escolha a espécie: digite as primeiras letras');$('#espQ')?.focus();return false}
       const dados={local:String(fd.get('local')||'').trim(),custoUnit:fd.get('custoUnit')===''?'':num(fd.get('custoUnit')),
         precoVenda:fd.get('precoVenda')===''?'':num(fd.get('precoVenda')),obs:String(fd.get('obs')||'').trim()};
       if(ehLote){dados.especieId=especieId;dados.origem=fd.get('origem')||''}
@@ -1840,7 +2173,7 @@ VIEWS.mais=()=>{
     <button class="item" data-go="backup"><span class="tx"><strong>Cópia de segurança</strong><small>Exportar ou restaurar todos os dados</small></span>›</button>
   </div>
   ${S.itens.some(i=>i.exemplo)?`<button class="btn warn" id="mEx">Apagar dados de exemplo</button>`:''}
-  <div class="muted" style="font-size:13px;text-align:center">Caderno do Viveiro · versão 4<br><span style="font-size:11px">Ícone da tesoura de poda: game-icons.net (CC BY 3.0)</span></div>`;
+  <div class="muted" style="font-size:13px;text-align:center">Caderno do Viveiro · versão 5<br><span style="font-size:11px">Ícone da tesoura de poda: game-icons.net (CC BY 3.0)</span></div>`;
   $$('[data-go]').forEach(b=>b.onclick=()=>ir(b.dataset.go));
   const bx=$('#mEx');if(bx)bx.onclick=async()=>{if(!bx.dataset.conf){bx.dataset.conf=1;bx.textContent='Toque de novo para apagar os exemplos';return}
     for(const t of TABS)for(const r of S[t].filter(x=>x.exemplo))await DB.del(t,r.id);
@@ -1851,14 +2184,16 @@ VIEWS.especies=()=>{
   const es=ativos(S.especies).sort((a,b)=>a.nome.localeCompare(b.nome));
   $('#view').innerHTML=`<button class="btn pri add" id="nEsp">Nova espécie</button>
   <div class="list">${es.length?es.map(e=>{const n=ativos(S.itens).filter(i=>i.tipo==='lote'&&i.especieId===e.id).reduce((s,l)=>s+qtdTotal(l.id),0);
-    return `<button class="item" data-esp="${e.id}"><span class="tag">${esc(siglaDe(e))}</span><span class="tx"><strong>${esc(e.nome)}</strong><small><i>${esc(e.cientifico||'')}</i>${e.precoVenda?' · '+brl(e.precoVenda):''}${e.intervaloRega?' · rega a cada '+e.intervaloRega+'d':''}</small></span><span class="qt">${n}<small>em estoque</small></span></button>`}).join(''):'<div class="empty">Nenhuma espécie.</div>'}</div>`;
+    return `<button class="item" data-esp="${e.id}"><span class="tag">${esc(siglaDe(e))}</span><span class="tx"><strong>${esc(e.nome)}</strong><small><i>${esc(e.cientifico||'')}</i>${e.nativa==='sim'?' · nativa':''}${custoPadraoDe(e)!==''?' · custo '+brl(custoPadraoDe(e)):''}${e.precoVenda?' · venda '+brl(e.precoVenda):''}${e.intervaloRega?' · rega a cada '+e.intervaloRega+'d':''}</small></span><span class="qt">${n}<small>em estoque</small></span></button>`}).join(''):'<div class="empty">Nenhuma espécie.</div>'}</div>`;
   $('#nEsp').onclick=()=>formEspecie();
   $$('[data-esp]').forEach(b=>b.onclick=()=>formEspecie(especiePor(b.dataset.esp)));
 };
 function formEspecie(e){
   const novo=!e;e=e||{};
   folha(`<form><h3>${novo?'Nova espécie':esc(e.nome)}</h3>
-    ${novo?`<label class="f">Preencher do catálogo<select id="selCat"><option value="">Nativa do catálogo (opcional)…</option>${CATALOGO.map((c,i)=>ativos(S.especies).some(x=>x.cientifico===c.cientifico)?'':`<option value="${i}">${esc(c.nome)} · ${esc(c.cientifico)}</option>`).join('')}</select><small>Do catálogo do seu projeto. Confira e ajuste.</small></label>`:''}
+    ${novo?`<div class="f espbox"><span class="lbl">Preencher do catálogo <small>${CATALOGO.length} espécies · digite letras ou use a foto</small></span>
+      <div class="espwrap"><div class="esprow"><input id="catQ" type="search" autocomplete="off" placeholder="Ex.: ipê, jib, Spathi…"><button type="button" class="btn sm" id="catFoto" title="Identificar pela foto">${ic('foto')}</button></div>
+      <div id="catLista" class="esplista" hidden></div></div><input type="file" id="catArq" accept="image/*" capture="environment" hidden><div id="catIA"></div></div>`:''}
     <label class="f">Nome popular<input name="nome" value="${esc(e.nome||'')}" required></label>
     <label class="f">Nome científico<input name="cientifico" value="${esc(e.cientifico||'')}"></label>
     <label class="f">Sigla (2 letras)<input name="sigla" maxlength="2" value="${esc(e.sigla||'')}" placeholder="automática" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase"><small>Começo do código das etiquetas, ex.: ${esc(e.sigla||'PI')}000123. Mudar a sigla não muda etiquetas já impressas.</small></label>
@@ -1868,13 +2203,31 @@ function formEspecie(e){
     <label class="f">Luz<select name="luz">${['','Sol pleno','Sol ou meia-sombra','Meia-sombra','Sombra'].map(o=>`<option ${o===(e.luz||'')?'selected':''}>${o}</option>`).join('')}</select></label></div>
     <div class="f2"><label class="f">Regar a cada (dias)<input name="intervaloRega" type="number" inputmode="numeric" min="1" value="${e.intervaloRega??''}" placeholder="pela etapa"></label>
     <label class="f">Adubar a cada (dias)<input name="intervaloAdubacao" type="number" inputmode="numeric" min="1" value="${e.intervaloAdubacao??''}" placeholder="${num(S.cfg.diasAdubo)||30}"></label></div>
+    <div class="f2"><label class="f">Custo padrão por muda (R$) <small>preço de compra</small><input name="custoPadrao" inputmode="decimal" value="${e.custoPadrao??''}" placeholder="0,00"></label>
+    <label class="f">Nativa do Brasil?<select name="nativa">${['','sim','não'].map(o=>`<option ${o===(e.nativa||'')?'selected':''} value="${o}">${o||'Não sei'}</option>`).join('')}</select></label></div>
+    ${comprasDe(e).length?`<div class="card" style="font-size:14px"><b>Compras registradas</b>${comprasDe(e).map(c=>`<div class="muted">${c.data?dataBR(c.data)+' · ':''}${esc(c.desc||'')} · ${c.qtd||1} × ${brl(c.preco)}${c.pag?' · '+esc(c.pag):''}</div>`).join('')}</div>`:''}
     <label class="f">Cuidados <small>Aparece para o cliente ao escanear o QR</small><textarea name="cuidados" placeholder="Luz, rega, solo, porte adulto…">${esc(e.cuidados||'')}</textarea></label>
-    ${rodapeForm()}</form>`,{onOpen:bg=>{const c=$('#selCat',bg);if(c)c.onchange=()=>{const x=CATALOGO[c.value];if(!x)return;const f=$('form',bg);
-      for(const k of ['nome','cientifico','familia','luz','cuidados'])if(f[k])f[k].value=x[k]||''}},onSubmit:async fd=>{
+    ${rodapeForm()}</form>`,{onOpen:bg=>{const q=$('#catQ',bg);if(!q)return;const f=$('form',bg),lista=$('#catLista',bg);
+      const encher=x=>{for(const k of ['nome','cientifico','familia','luz','cuidados'])if(f[k]&&x[k])f[k].value=x[k];
+        if(x.nativa!==undefined&&x.nativa!==null&&x.nativa!=='')f.nativa.value=x.nativa===true||x.nativa==='sim'?'sim':'não';lista.hidden=true;q.value=x.nome||''};
+      q.oninput=()=>{const t=normBusca(q.value).trim();if(!t){lista.hidden=true;return}
+        const rs=buscarEspecies(q.value,{limite:10}).filter(r=>r.tipo==='cat');
+        lista.innerHTML=rs.map((r,i)=>`<button type="button" data-k="${i}"><span class="tx"><strong>${esc(r.c.nome)}</strong><small><i>${esc(r.c.cientifico)}</i> · ${esc(r.c.familia)}</small></span><span class="pill">${r.c.nativa?'nativa':'exótica'}</span></button>`).join('')||'<div class="muted" style="padding:10px">Nada no catálogo; preencha à mão.</div>';
+        lista.hidden=false;$$('[data-k]',lista).forEach(b=>b.onmousedown=b.onclick=ev=>{ev.preventDefault();encher(rs[+b.dataset.k].c)})};
+      q.onblur=()=>setTimeout(()=>{lista.hidden=true},180);
+      const arq=$('#catArq',bg),out=$('#catIA',bg);
+      $('#catFoto',bg).onclick=()=>{if(!iaPronta()){toast('Configure o Gemini na engrenagem › Assistente de IA');return}arq.click()};
+      arq.onchange=async()=>{const fo=arq.files[0];if(!fo)return;out.innerHTML='<div class="iares"><p>Identificando a planta…</p></div>';
+        try{const d=await iaIdentificarEspecie(fo);out.innerHTML=htmlIdentificacao(d);
+          $$('[data-idx]',out).forEach(b=>b.onclick=()=>{const k=+b.dataset.idx;const op=k<0?d:d.alternativas[k];const c=catalogoPor(op.cientifico,op.nomePopular);
+            encher(c||{nome:op.nomePopular,cientifico:op.cientifico,familia:op.familia,luz:op.luz,cuidados:op.cuidados,nativa:op.nativaBrasil});out.innerHTML=''})}
+        catch(e){out.innerHTML=`<div class="aviso">${esc(e.message)}</div>`}finally{arq.value=''}}},onSubmit:async fd=>{
     const sg=semAcento(fd.get('sigla')).replace(/\s/g,'');
     if(sg&&(sg.length!==2||ativos(S.especies).some(x=>x.id!==e.id&&x.sigla===sg))){toast(sg.length!==2?'A sigla precisa ter 2 letras':'Essa sigla já é de outra espécie');return false}
     Object.assign(e,{id:e.id||uid(),luz:fd.get('luz')||'',intervaloRega:fd.get('intervaloRega')===''?'':num(fd.get('intervaloRega')),intervaloAdubacao:fd.get('intervaloAdubacao')===''?'':num(fd.get('intervaloAdubacao')),nome:String(fd.get('nome')).trim(),cientifico:String(fd.get('cientifico')||'').trim(),familia:String(fd.get('familia')||'').trim(),
-      tempoProducao:String(fd.get('tempoProducao')||'').trim(),precoVenda:fd.get('precoVenda')===''?'':num(fd.get('precoVenda')),cuidados:String(fd.get('cuidados')||'').trim()});
+      tempoProducao:String(fd.get('tempoProducao')||'').trim(),precoVenda:fd.get('precoVenda')===''?'':num(fd.get('precoVenda')),cuidados:String(fd.get('cuidados')||'').trim(),
+      custoPadrao:fd.get('custoPadrao')===''?'':num(fd.get('custoPadrao')),nativa:fd.get('nativa')||''});
+    if(!e.grupo){const c=catalogoPor(e.cientifico,e.nome);if(c)e.grupo=c.grupo}
     e.sigla=sg||e.sigla||sugerirSigla(e.nome,e.id);
     await salvar('especies',e);toast('Espécie salva');render()}});
 }
@@ -2096,6 +2449,7 @@ async function criarExemplos(){
   if(h.startsWith('#c-')){publico=true;$('#tabs').hidden=true;$('#btnMais').hidden=true;$('#btnTema').hidden=true;$('#btnIA').hidden=true;document.querySelector('main').style.paddingBottom='32px';pintarSync();atual={v:'cliente',p:h.slice(3).toUpperCase()};render();return}
   if(S.itens.some(i=>i.exemplo)&&S.cfg.exVer!==3){for(const t of TABS)for(const r of S[t].filter(x=>x.exemplo))await DB.del(t,r.id);await carregar();S.cfg.ultimoSerial=0}
   if(!S.itens.length&&!S.cfg.exemplosApagados&&!S.cfg.url){await criarExemplos();S.cfg.exVer=3;await salvarCfg()}
+  try{await semearCompras()}catch(e){console.warn(e)}
   pintarSync();render();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude|anthropic/.test(location.hostname))navigator.serviceWorker.register('./sw.js')}catch(e){}
