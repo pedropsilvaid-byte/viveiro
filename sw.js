@@ -1,5 +1,5 @@
 // Caderno do Viveiro — guarda o app no celular para abrir sem internet
-const VERSAO = 'viveiro-v5';
+const VERSAO = 'viveiro-v7';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png',
 
   'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js',

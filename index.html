@@ -372,6 +372,17 @@ label.f small{text-transform:none;letter-spacing:0;font-size:12px}
 .scanwrap{position:relative}
 .mira{position:absolute;left:8%;right:8%;top:50%;height:2px;background:#E53935;box-shadow:0 0 8px #E53935}
 @media (max-width:360px){.modos{grid-template-columns:1fr}}
+.iares{background:var(--purple-soft);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.iares p{margin:0}.iares ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.iacab{display:flex;justify-content:space-between;gap:8px;align-items:center;color:var(--purple)}
+.iamsg{border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.5;max-width:92%}
+.iamsg.eu{align-self:flex-end;background:var(--blue-soft);color:var(--ink)}
+.iamsg.ia{align-self:flex-start;background:var(--purple-soft);color:var(--ink)}
+.iavazio{display:flex;flex-direction:column;gap:8px}.iavazio p{margin:0}
+.iaacoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.iaacoes .btn{background:var(--surface);color:var(--purple)}
+.iabox{display:flex;flex-direction:column;gap:10px}
+.iabox .row .btn.sm{flex:none}
 @media (max-width:420px){.top h1{font-size:14px;letter-spacing:.02em}}
 </style>
 
@@ -381,6 +392,7 @@ label.f small{text-transform:none;letter-spacing:0;font-size:12px}
   <button class="back" id="btnVoltar" hidden>‹ Voltar</button>
   <h1 id="titulo">Caderno do Viveiro</h1>
   <button class="sync" id="btnSync">…</button>
+  <button class="ico" id="btnIA" aria-label="Assistente do viveiro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M19 14l.8 2.2 2.2.8-2.2.8L19 20l-.8-2.2-2.2-.8 2.2-.8z"/></svg></button>
   <button class="ico" id="btnTema" aria-label="Modo claro ou escuro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
   <button class="ico" id="btnMais" aria-label="Mais opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div></header>
@@ -505,9 +517,9 @@ $$('#tabs button').forEach(b=>b.onclick=()=>aba(b.dataset.v));
 const VIEWS={};
 function render(){
   pararCamera();
-  const fn=VIEWS[atual.v]||VIEWS.inicio;const raiz=['inicio','estoque','escanear','manejo','vendas','mais'].includes(atual.v);
+  const fn=VIEWS[atual.v]||VIEWS.inicio;const raiz=['inicio','estoque','escanear','manejo','vendas','mais','assistente'].includes(atual.v);
   $('#btnVoltar').hidden=raiz||publico;
-  $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===atual.v));$('#btnMais').classList.toggle('on',atual.v==='mais');
+  $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===atual.v));$('#btnMais').classList.toggle('on',atual.v==='mais');$('#btnIA').classList.toggle('on',atual.v==='assistente');
   fn(atual.p);
 }
 function setTitulo(t){$('#titulo').textContent=t}
@@ -517,6 +529,7 @@ function pintarSync(){const b=$('#btnSync');if(publico){b.hidden=true;return}
   else{b.className='sync';b.textContent='Sem planilha'}}
 $('#btnSync').onclick=()=>sincronizar(true);
 $('#btnMais').onclick=()=>aba('mais');
+$('#btnIA').onclick=()=>aba('assistente');
 function aplicarTema(){const t=S.cfg.tema;if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme}
 $('#btnTema').onclick=async()=>{const atualT=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   S.cfg.tema=atualT==='dark'?'light':'dark';aplicarTema();await salvarCfg();toast(S.cfg.tema==='dark'?'Modo escuro':'Modo claro')};
@@ -722,8 +735,8 @@ VIEWS.inicio=()=>{
     <button class="atalho c-orange" data-at="lote"><i>${ic('broto')}</i>Novo lote</button>
     <button class="atalho c-blue" data-at="rega"><i>${ic('gota')}</i>Regar</button>
     <button class="atalho c-pink" data-at="praga"><i>${ic('bug')}</i>Praga ou doença</button>
-    <button class="atalho c-purple" data-at="etq"><i>${ic('etq')}</i>Etiquetas</button>
-    <button class="atalho c-brown" data-at="esp"><i>${ic('folha')}</i>Espécies</button>
+    <button class="atalho c-brown" data-at="etq"><i>${ic('etq')}</i>Etiquetas</button>
+    <button class="atalho c-purple" data-at="ia"><i>${ic('brilho')}</i>Assistente</button>
   </div>
   <div class="kpis">
     <div class="kpi"><b>${mudas.toLocaleString('pt-BR')}</b><span>mudas em ${lotes.length} lote${lotes.length===1?'':'s'}</span></div>
@@ -765,7 +778,7 @@ VIEWS.inicio=()=>{
     if(a==='venda')escolherItem('Vender de qual lote/muda?',it=>formVenda(it),it=>qtdPropria(it.id)>0);
     else if(a==='lote')formLote();else if(a==='rega')formManejoLote('rega',ag.rega.map(x=>x.l.id));
     else if(a==='praga')escolherItem('Onde está o problema?',it=>formOcorrencia(it),it=>!it.dataSaida);
-    else if(a==='etq')ir('etiquetas');else if(a==='esp')ir('especies')});
+    else if(a==='etq')ir('etiquetas');else if(a==='ia')aba('assistente');else if(a==='esp')ir('especies')});
   $$('[data-acao]').forEach(b=>{const go=()=>{const [t,v]=b.dataset.acao.split(':');if(t==='etapa'){filtroEst.etapa=v;aba('estoque')}};b.onclick=go;b.onkeydown=e=>{if(e.key==='Enter')go()}});
   ligarItens();ligarFaixa();
 };
@@ -777,9 +790,10 @@ VIEWS.manejo=()=>{
   $('#view').innerHTML=`${faixaHoje({clicavel:false})}<div class="seg" id="segM">
     <button data-t="agenda" class="${abaManejo==='agenda'?'on':''}">Agenda</button>
     <button data-t="ocorr" class="${abaManejo==='ocorr'?'on':''}">Pragas e doenças</button>
-    <button data-t="guia" class="${abaManejo==='guia'?'on':''}">Guia</button></div><div id="mAba" style="display:flex;flex-direction:column;gap:16px"></div>`;
+    <button data-t="guia" class="${abaManejo==='guia'?'on':''}">Guia</button>
+    <button data-t="ia" class="${abaManejo==='ia'?'on':''}">Assistente</button></div><div id="mAba" style="display:flex;flex-direction:column;gap:16px"></div>`;
   $$('#segM button').forEach(b=>b.onclick=()=>{abaManejo=b.dataset.t;render()});
-  ({agenda:manejoAgenda,ocorr:manejoOcorr,guia:manejoGuia})[abaManejo]($('#mAba'));
+  ({agenda:manejoAgenda,ocorr:manejoOcorr,guia:manejoGuia,ia:manejoIA})[abaManejo]($('#mAba'));
   ligarItens();
 };
 function linhaLote(l,direita,extra=''){return `<button class="item" data-item="${l.id}"><span class="tag">${esc(l.codigo)}</span>
@@ -920,6 +934,7 @@ function formOcorrencia(it,probId){
     <div class="f"><b style="font-size:14px">Gravidade</b>${segSev(2)}</div>
     <div class="f2"><label class="f">% das mudas afetadas<input name="pct" type="number" inputmode="numeric" min="0" max="100" placeholder="Ex.: 20"></label>${selRevisao(7)}</div>
     <label class="f">Foto<input name="foto" type="file" accept="image/*" capture="environment"></label>
+    <button type="button" class="btn" id="iaDiag" style="background:var(--purple-soft);color:var(--purple)">Analisar a foto com IA</button><div id="iaOut"></div>
     <label class="f">Observação<textarea name="nota" placeholder="Onde aparece, quantas mudas, desde quando"></textarea></label>
     <label class="ck"><input type="checkbox" name="jaTratou" id="jaT"><span>Já fiz um tratamento agora</span></label>
     <label class="f" id="tratW" hidden>Produto e dose<input name="produto" list="dlCtrl" placeholder="Ex.: Óleo de neem 5 ml/L"></label>${datalistControles()}
@@ -927,7 +942,21 @@ function formOcorrencia(it,probId){
     ${rodapeForm('Registrar')}</form>`,{
     onOpen:bg=>{const s=$('select[name=prob]',bg);s.onchange=()=>{$('#outroW',bg).hidden=s.value!=='__outro'};
       $('#jaT',bg).onchange=e=>{$('#tratW',bg).hidden=!e.target.checked};
-      $('#vSin',bg).onclick=()=>{if(probPor(s.value))verProblema(s.value,{registrar:false});else toast('Escolha um problema na lista')}},
+      $('#vSin',bg).onclick=()=>{if(probPor(s.value))verProblema(s.value,{registrar:false});else toast('Escolha um problema na lista')};
+      $('#iaDiag',bg).onclick=async()=>{const f=$('form',bg);const foto=f.foto.files[0];
+        if(!iaPronta()){toast('Configure o assistente na engrenagem › Assistente de IA');return}
+        if(!foto){toast('Primeiro tire ou escolha uma foto');f.foto.click();return}
+        const b=$('#iaDiag',bg);b.disabled=true;b.textContent='Analisando…';
+        try{const d=await iaDiagnostico(foto,it,f.nota.value);$('#iaOut',bg).innerHTML=htmlDiagnostico(d);
+          if(probPor(d.problemaId))s.value=d.problemaId;else if(d.problemaId!=='saudavel'&&d.nome){s.value='__outro';$('#outroW',bg).hidden=false;f.outro.value=d.nome}
+          const sv=[1,2,3].includes(+d.severidade)?+d.severidade:2;const r=$(`input[name=sev][value="${sv}"]`,bg);if(r)r.checked=true;
+          if(d.pctAfetado!=null&&d.pctAfetado!=='')f.pct.value=Math.round(+d.pctAfetado)||'';
+          const resumo=[d.sinais?'IA: '+d.sinais:'',(d.acoes||[]).length?'Sugestão: '+d.acoes.join('; '):''].filter(Boolean).join('\n');
+          if(resumo)f.nota.value=(f.nota.value?f.nota.value+'\n':'')+resumo;
+          if(d.problemaId==='saudavel')toast('A planta parece sadia na foto')}
+        catch(e){$('#iaOut',bg).innerHTML=`<div class="aviso">${esc(e.message)}</div>`}
+        finally{b.disabled=false;b.textContent='Analisar a foto com IA'}};
+    },
     onSubmit:async fd=>{
       const pid=fd.get('prob');const outro=String(fd.get('outro')||'').trim();
       if(pid==='__outro'&&!outro){toast('Descreva o problema');return false}
@@ -1259,6 +1288,7 @@ function menuMais(it){
     <button class="btn" data-m="contagem">Contagem do estoque</button>
     <button class="btn" data-m="entrada">Adicionar mudas</button>
     <button class="btn" data-m="nota">Anotação</button>
+    <button class="btn" data-m="ia" style="background:var(--purple-soft);color:var(--purple)">Perguntar à IA sobre este ${TIPO_ITEM[it.tipo].toLowerCase()}</button>
     <button class="btn" data-m="editar">Editar dados</button>
     <button class="btn" data-m="cliente">Ver como o cliente</button>
     <button class="btn" data-m="etq">Etiqueta</button>
@@ -1268,7 +1298,7 @@ function menuMais(it){
     if(m==='apagar'&&!b.dataset.conf){b.dataset.conf=1;b.textContent='Toque de novo para apagar (inclui o que está dentro)';return}
     fechar();
     if(m==='sep')formSeparar(it);else if(m==='tratamento'||m==='nota')formManejo(it,m);else if(m==='contagem'||m==='entrada')formQtd(it,m);
-    else if(m==='editar')formLote(it);else if(m==='cliente')ir('cliente',it.codigo);else if(m==='etq')ir('etiquetas',[it.id]);
+    else if(m==='ia'){iaItemId=it.id;abaManejo='ia';aba('manejo')}else if(m==='editar')formLote(it);else if(m==='cliente')ir('cliente',it.codigo);else if(m==='etq')ir('etiquetas',[it.id]);
     else if(m==='apagar'){for(const x of [it,...descendentes(it.id)]){x.excluido=true;await salvar('itens',x)}toast('Apagado');voltar()}});
 }
 function ic(n){const P={gota:'<path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z"/>',foto:'<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>',
@@ -1277,6 +1307,7 @@ function ic(n){const P={gota:'<path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5
   bug:'<path d="M9 7.5a3 3 0 0 1 6 0"/><rect x="7" y="8" width="10" height="12" rx="5"/><path d="M12 12v8M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/>',
   etapa:'<path d="M4 20h16"/><path d="M7 20v-4M12 20v-8M17 20V6"/>',separar:'<rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/><path d="M7 11v5h6"/>',
   conta:'<path d="M5 7h14M5 12h14M5 17h9"/>',spray:'<path d="M8 10h6v10H8z"/><path d="M10 10V7h2v3M12 7h3M18 5l2-1M18 7h3M18 9l2 1"/>',
+  brilho:'<path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M19 14l.8 2.2 2.2.8-2.2.8L19 20l-.8-2.2-2.2-.8 2.2-.8z"/>',
   olho:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/>',
   barras:'<path d="M4 5v14M7 5v14M10 5v14M14 5v14M16 5v14M20 5v14"/>',
@@ -1417,6 +1448,232 @@ async function lerImagem(src){
   const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(bmp,0,0,c.width,c.height);
   const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);return r?r.data:null;
 }
+/* ============ ASSISTENTE DE IA (Gemini, chave do Google AI Studio guardada só neste aparelho) ============ */
+const iaPronta=()=>!!S.cfg.geminiKey;
+function iaModelo(){return (S.cfg.geminiModelo||'gemini-flash-latest').trim()}
+async function iaModelosDisponiveis(){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':S.cfg.geminiKey}});
+  if(!r.ok)throw new Error(r.status===400||r.status===403?'chave inválida':'erro '+r.status);
+  const j=await r.json();
+  return (j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')).map(m=>m.name.replace(/^models\//,''))
+    .filter(n=>/flash/.test(n)&&!/(tts|image|audio|live|embedding|thinking|exp)/.test(n));
+}
+async function gemini({texto,imagem,json=false,sistema}){
+  if(!iaPronta())throw new Error('Configure a chave do Gemini na engrenagem › Assistente de IA');
+  if(!navigator.onLine)throw new Error('O assistente precisa de internet');
+  const parts=[{text:texto}];
+  if(imagem){let b=imagem;try{b=await comprimir(imagem)}catch(e){}parts.push({inline_data:{mime_type:'image/jpeg',data:await blobB64(b)}})}
+  const corpo={contents:[{role:'user',parts}],generationConfig:{temperature:.3,...(json?{responseMimeType:'application/json'}:{})}};
+  if(sistema)corpo.systemInstruction={parts:[{text:sistema}]};
+  const chamar=async m=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.cfg.geminiKey},body:JSON.stringify(corpo)});
+  let r=await chamar(iaModelo());
+  if(r.status===404){ // modelo antigo ou nome mudou: escolhe um Flash disponível
+    const ms=await iaModelosDisponiveis();const m=ms.find(n=>!/lite|preview/.test(n))||ms[0];
+    if(m){S.cfg.geminiModelo=m;await salvarCfg();r=await chamar(m)}}
+  if(r.status===429)throw new Error('Limite gratuito do Gemini atingido. Tente de novo em alguns minutos.');
+  if(r.status===400||r.status===403){let msg='';try{msg=(await r.json()).error?.message||''}catch(e){}throw new Error(/API key/i.test(msg)?'Chave do Gemini inválida':'O Gemini recusou o pedido'+(msg?': '+msg:''))}
+  if(!r.ok)throw new Error('Gemini indisponível ('+r.status+')');
+  const j=await r.json();const t=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').trim();
+  if(!t)throw new Error('O Gemini não respondeu. Tente outra foto ou reformule.');
+  if(!json)return t;
+  try{return JSON.parse(t.replace(/^```(json)?|```$/g,''))}catch(e){throw new Error('Resposta do Gemini fora do formato')}
+}
+const IA_SISTEMA=`Você é um técnico agrícola que apoia um viveiro de mudas ornamentais nativas no Brasil. Responda em português do Brasil, de forma curta, prática e gentil.
+Priorize manejo cultural e controles alternativos (caldas e receitas caseiras). Agrotóxico só com receituário agronômico de um profissional habilitado: diga isso quando for o caso, sem indicar produto químico nem dose.
+Quando não tiver certeza, diga e sugira o que observar ou fotografar para confirmar.
+Receitas e controles que o viveiro usa (prefira citar estes): ${RECEITAS.filter(r=>r.preparo!=='—').map(r=>`${r.nome} (${r.para}): ${r.uso}`).join(' | ')}`;
+function contextoItem(it){if(!it)return '';const e=especieDe(it)||{};
+  const evs=[...eventosDe(it.id),...ancestrais(it).flatMap(a=>eventosDe(a.id))].sort((a,b)=>a.data<b.data?1:-1).slice(0,12);
+  const ocs=ocDoItem(it).filter(o=>o.status!=='resolvida');
+  return `Planta: ${nomeDe(it)}${e.cientifico?' ('+e.cientifico+')':''}${e.familia?', família '+e.familia:''}. Código ${it.codigo}, ${TIPO_ITEM[it.tipo].toLowerCase()} com ${qtdTotal(it.id)} mudas.
+Etapa: ${herda(it,'etapa')||'não informada'}. Entrada no viveiro: ${dataBR(herda(it,'dataEntrada')||it.dataEntrada)}. Origem: ${herda(it,'origem')||'—'}. Local: ${herda(it,'local')||'—'}. Luz da espécie: ${e.luz||'—'}.
+Cuidados cadastrados: ${e.cuidados||'—'}
+Registros recentes: ${evs.map(x=>`${dataBR(x.data)} ${TIPOS[x.tipo]||x.tipo}${x.produto?' ('+x.produto+')':''}${x.nota?' - '+x.nota:''}`).join('; ')||'nenhum'}
+Pragas/doenças abertas: ${ocs.map(o=>`${nomeProblema(o)} (${SEV[o.severidade]?.[0]||''})`).join(', ')||'nenhuma'}`}
+
+/* diagnóstico por foto: devolve sugestão estruturada */
+async function iaDiagnostico(foto,it,obs=''){
+  const lista=BIBLIO.map(p=>`${p.id} = ${p.nome} [${CAT[p.cat]}]`).join('\n');
+  return gemini({imagem:foto,json:true,sistema:IA_SISTEMA,texto:`Analise a foto desta muda e diga o problema mais provável.
+${contextoItem(it)}
+${obs?'Observação do viveirista: '+obs:''}
+Escolha "problemaId" desta lista (ou "outro" se nenhum servir, ou "saudavel" se a planta parecer sadia):
+${lista}
+Responda SOMENTE um JSON com: {"problemaId":"","nome":"nome do problema em português","confianca":"baixa|média|alta","severidade":1|2|3,"pctAfetado":número de 0 a 100 ou null,"sinais":"o que você vê na foto","acoes":["passos práticos, do mais urgente ao menos"],"confirmar":"o que observar para ter certeza"}`});
+}
+function htmlDiagnostico(d){const p=probPor(d.problemaId);
+  return `<div class="iares"><div class="iacab"><b>${esc(p?.nome||d.nome||'Sem diagnóstico')}</b>${d.problemaId==='saudavel'?'<span class="pill ok">Parece sadia</span>':`<span class="pill ${d.confianca==='alta'?'ok':d.confianca==='média'?'warn':'bad'}">confiança ${esc(d.confianca||'?')}</span>`}</div>
+  ${d.sinais?`<p><b>Sinais:</b> ${esc(d.sinais)}</p>`:''}
+  ${(d.acoes||[]).length?`<ol>${d.acoes.map(a=>`<li>${esc(a)}</li>`).join('')}</ol>`:''}
+  ${d.confirmar?`<p class="muted"><b>Para confirmar:</b> ${esc(d.confirmar)}</p>`:''}
+  <p class="muted" style="font-size:12px">Sugestão do Gemini: confira com o Guia e, se for grave, com um técnico.</p></div>`}
+
+function mdSimples(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^\s*[-*] (.+)$/gm,'• $1').replace(/^#+\s*(.+)$/gm,'<b>$1</b>').replace(/\n/g,'<br>')}
+
+/* tela de configuração */
+VIEWS.ia=()=>{
+  setTitulo('Assistente de IA');
+  $('#view').innerHTML=`<div class="card" style="display:flex;flex-direction:column;gap:8px">
+    <b>Como ligar (grátis, 3 minutos)</b>
+    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+      <li>No navegador, abra <b>aistudio.google.com/apikey</b> e entre com sua conta Google.</li>
+      <li>Toque em <b>Criar chave de API</b> (Create API key) e copie a chave (começa com “AIza”).</li>
+      <li>Cole abaixo e toque em <b>Salvar e testar</b>.</li></ol>
+    <div class="muted" style="font-size:13px">A chave fica guardada só neste celular, não vai para a planilha. O plano gratuito tem limite de pedidos por minuto e por dia, e o Google pode usar o conteúdo enviado para melhorar os serviços dele: não mande fotos ou dados que você não queira compartilhar.</div></div>
+  <form id="fIA" class="card" style="display:flex;flex-direction:column;gap:12px">
+    <label class="f">Chave do Gemini<input name="k" type="password" autocomplete="off" autocapitalize="off" value="${esc(S.cfg.geminiKey||'')}" placeholder="AIza…"></label>
+    <label class="f">Sobre o meu viveiro <small>O assistente lê isto em toda pergunta: cidade e clima, tipo de cliente, como você define preços, metas</small><textarea name="sobre" placeholder="Ex.: Viveiro de nativas da Mata Atlântica no RJ, vendo para paisagistas e na feira de domingo. Quero margem de pelo menos 60%.">${esc(S.cfg.sobreViveiro||'')}</textarea></label>
+    <label class="f">Modelo <small>Deixe como está; o app troca sozinho se o nome mudar</small><input name="m" autocapitalize="off" value="${esc(iaModelo())}"></label>
+    <div class="row"><button type="button" class="btn warn" id="iaApaga">Remover chave</button><button class="btn pri" type="submit">Salvar e testar</button></div>
+    <div id="iaTeste" class="muted" style="font-size:14px"></div></form>`;
+  $('#fIA').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);S.cfg.geminiKey=String(f.get('k')).trim();S.cfg.geminiModelo=String(f.get('m')).trim()||'gemini-flash-latest';S.cfg.sobreViveiro=String(f.get('sobre')||'').trim();await salvarCfg();
+    const out=$('#iaTeste');out.textContent='Testando…';
+    try{const t=await gemini({texto:'Responda apenas: Assistente do viveiro pronto.'});out.innerHTML=`<span class="up">Funcionando</span> com o modelo <b>${esc(iaModelo())}</b>: ${esc(t)}`}
+    catch(err){out.innerHTML=`<span class="txt-bad">${esc(err.message)}</span>`}};
+  $('#iaApaga').onclick=async()=>{S.cfg.geminiKey='';await salvarCfg();toast('Chave removida');render()};
+};
+
+/* ============ BASE DE CONHECIMENTO DO PROJETO (resumos dos manuais do projeto "Plantas ornamentais") ============ */
+const CONHEC=[
+ {t:'Local e planejamento do viveiro',k:'local terreno planejar instalar viveiro area agua acesso vento quebra-vento cerca drenagem',f:'Manual de mudas (Vale do Ribeira); SENAR-PR Floricultura Básico',x:'Escolha local com acesso fácil, água limpa o ano todo, energia para bomba, terreno plano ou até 3% de inclinação, sol na maior parte do dia e boa drenagem. Canteiros no sentido leste-oeste. Cerque contra animais e use quebra-vento (fileira de árvores ou bambu a 15–20 m) onde venta forte. Reserve cerca de 50–60% da área para produção e o resto para caminhos, galpão, depósito e preparo de substrato.'},
+ {t:'Casa de vegetação e sombrite',k:'sombrite sombra estufa telado casa vegetacao cobertura luz estiolamento',f:'Manual de mudas (Vale do Ribeira); Embrapa Circular 47',x:'Use sombrite 50% (deixa passar metade da luz) nas laterais e no teto, telhado em duas águas e altura livre de 2,5 m; piso de brita. Sombra demais deixa a muda estiolada (fina e comprida) e úmida, favorecendo doenças. Tenha área coberta para germinação e crescimento e área descoberta para rustificação.'},
+ {t:'Recipientes: saquinho ou tubete',k:'saquinho saco tubete recipiente embalagem tamanho vaso bandeja',f:'Manual de mudas (Vale do Ribeira); Manual do Horto Carlos Toledo Rizzini (RJ)',x:'Saquinhos são mais baratos e ficam no chão: 9×14 ou 8×15 cm (0,07 mm) para pioneiras; até 11×25 cm (0,15 mm) para espécies que ficam mais tempo. Tubetes (50, 120 ou 290 cm³) custam mais no início, mas reduzem custo de operação e transporte; ficam em bandejas sobre bancadas. Deixe uns 2 cm vazios no topo do saco para reter a água da rega. Escolha conforme o que o comprador prefere.'},
+ {t:'Receitas de substrato',k:'substrato terra mistura receita areia composto vermiculita esterco proporcao 2:1:1 solarizar',f:'Manual de mudas (Vale do Ribeira); Manual do Horto Rizzini',x:'Saquinho: 6 partes de terra de subsolo (abaixo de 30 cm), 2 de matéria orgânica curtida e 1 de areia. Tubete: 70% composto orgânico, 20% vermiculita, 5% argila, 5% areia. O Horto Rizzini usa 2:1:1 (areia : terra : adubo orgânico). Espécies de restinga podem ir só em areia; de floresta úmida pedem terra e adubo; de área alagada, um pouco de argila. Peneire cada componente antes de misturar e deixe o substrato ao sol (solarização) para reduzir doenças e sementes de mato.'},
+ {t:'Substrato para estacas',k:'estaca enraizar substrato poroso casca arroz carbonizada vermiculita',f:'Manual de jardinagem do Rio; SENAR-PR',x:'Para enraizar, o substrato precisa ser poroso e não encharcar: 60–80% de material poroso (vermiculita, casca de arroz carbonizada) e 20–40% de composto ou húmus. Outra receita: 30% terra, 30% areia, 20% casca de arroz carbonizada, 20% vermiculita. Depois de enraizada, passe a muda para substrato fértil.'},
+ {t:'Adubação de mudas em saquinho (sem análise)',k:'adubo adubacao npk ureia superfosfato cloreto potassio dose cobertura arranque crescimento',f:'Manual de mudas (Vale do Ribeira)',x:'Arranque: superfosfato simples 5 g/L + sulfato de amônio 3 g/L + cloreto de potássio 2 g/L; aplicar 5 L da solução para cada 500 saquinhos. Crescimento: ureia 8 g/L + Yoorin ou superfosfato simples 6 g/L + cloreto de potássio 6 g/L; 5 L para 500 saquinhos a cada 15 dias. O ideal é fazer análise do substrato. Observe as mudas: falta de nutriente pode parecer doença.'},
+ {t:'Biofertilizante caseiro',k:'biofertilizante organico esterco leite melaco adubo liquido foliar',f:'Manual de mudas (Vale do Ribeira)',x:'Num tambor de 200 L: 20 kg de esterco fresco, 4 L de leite do dia, 2 kg de fosfato natural ou cinzas e 5 kg de açúcar mascavo (ou 10 L de caldo de cana); complete com água e mexa 5 minutos duas vezes ao dia por 8 dias. Para mudas, o manual indica diluir a 2% (400 ml em 20 L), na rega ou pulverizado nas folhas; no campo, 5%. Também ajuda contra pragas.'},
+ {t:'Preparar fórmula NPK',k:'npk formula misturar calcular quantidade fertilizante 4-14-8 10-10-10',f:'Embrapa – Princípios de nutrição (Floricultura Tropical)',x:'Quantidade de cada adubo = (kg de mistura × % desejada) ÷ % do nutriente no adubo. Ex.: 100 kg de 4-14-8 = 9 kg de ureia (45% N) + 78 kg de superfosfato simples (18% P2O5) + 13 kg de cloreto de potássio (60% K2O). 4-14-8 favorece flores e frutos. Não aplique nitrogênio e potássio junto com cal: atrapalham a absorção de cálcio.'},
+ {t:'Coleta e beneficiamento de sementes',k:'semente coleta fruto beneficiamento polpa secar extrair matriz',f:'SENAR-PR; Manual de mudas (Vale do Ribeira); Manual do Horto Rizzini',x:'Colha frutos maduros direto na planta matriz. Frutos carnosos: deixe de molho 12–24 h, amasse na peneira em água corrente; as sementes boas afundam. Não deixe as sementes na água depois de despolpar (podem começar a germinar). Seque à sombra. Frutos secos que abrem sozinhos secam ao sol em lona; os que não abrem pedem faca, tesoura de poda ou martelo. Anote espécie, matriz, local e data de cada lote de sementes.'},
+ {t:'Armazenamento de sementes',k:'armazenar guardar semente geladeira ortodoxa recalcitrante validade jucara',f:'SENAR-PR; Manual de mudas (Vale do Ribeira)',x:'Sementes ortodoxas aguentam secar: com 5–7% de umidade, em vidro bem fechado na geladeira, duram bem. Recalcitrantes (muitas nativas de frutos carnosos) perdem a viabilidade rápido e devem ser semeadas logo. Juçara: despolpe, lave bem e guarde em caixas plásticas furadas na sombra, molhando e mexendo uma vez por semana (dura até 6 meses). Faça testes de germinação de tempos em tempos.'},
+ {t:'Quebra de dormência',k:'dormencia escarificar lixa martelo alicate embeber agua germinacao demora',f:'Manual do Horto Rizzini; Manual de mudas (Vale do Ribeira)',x:'Se a semente tem casca dura e não absorve água, faça escarificação mecânica: lixar, cortar um pedacinho da lateral com alicate ou bater de leve com martelo. Depois deixe 24 h de molho em água. Escarificação com ácido é perigosa: só com orientação técnica. Ex.: guanandi (bater com martelo), comandaíba (corte lateral com alicate).'},
+ {t:'Semeadura direta e indireta',k:'semeadura semear sementeira direta indireta raleio profundidade quantas sementes',f:'Manual de mudas (Vale do Ribeira); Manual do Horto Rizzini; Manual de jardinagem do Rio',x:'Direta: 2 a 5 sementes por recipiente; faça o raleio quando houver 2–3 pares de folhas, deixando a muda mais forte e centralizada. Indireta (sementeira e depois repicagem): para sementes caras ou raras, muito pequenas ou grandes, com germinação desconhecida ou com dormência. Enterre a semente a uma profundidade igual ao seu diâmetro (em geral cobrir com cerca de 1 cm de areia; palmeiras até 4 cm). Proteja com sombrite até 30 dias após germinar (pioneiras dispensam).'},
+ {t:'Repicagem',k:'repicagem repicar transplante plantula folhas verdadeiras sementeira',f:'SENAR-PR; Manual do Horto Rizzini',x:'Repique quando aparecerem 2 folhas verdadeiras (primeiro par não cotiledonar). Molhe a sementeira antes, retire com espátula levando o máximo de substrato, abra um furo no centro do saquinho, coloque sem dobrar a raiz, aperte de leve e regue. Prefira dias amenos ou o fim da tarde e deixe na sombra alguns dias.'},
+ {t:'Estaquia',k:'estaca estaquia enraizar enraizador hormonio aib tiririca bisel gema propagacao',f:'SENAR-PR; Manual de jardinagem do Rio; Manual de mudas (Vale do Ribeira)',x:'Herbáceas: ponteiros com 2–3 folhas, corte em bisel logo abaixo de um nó; podem ser feitas o ano todo, menos no inverno. Lenhosas: 15–20 cm, 1–1,5 cm de diâmetro, 3–4 gemas, enterrar inclinada (~45°) com 2 gemas abaixo; enraízam em 30–90 dias. Primavera e verão são melhores. Hormônio (AIB) acelera: siga o rótulo. Enraizador natural de tiririca: bata 15 batatinhas em 500 ml de água sem cloro e deixe a base das estacas 15–30 min na mistura; use no mesmo dia.'},
+ {t:'Alporquia, mergulhia e divisão de touceira',k:'alporquia alporque mergulhia touceira divisao rizoma bulbo bromelia heliconia afilho',f:'SENAR-PR; Manual de jardinagem do Rio',x:'Alporquia: tire um anel de casca de ~1 cm num ramo semilenhoso de 1–1,5 cm, envolva com musgo úmido e plástico amarrado; evite o inverno. Mergulhia: dobre um ramo flexível até o solo, prenda com forquilha e cubra com terra. Divisão de touceira (bromélias, helicônias, lírio-da-paz, agapanto): desenterre, separe os afilhos com faca afiada, apare parte das folhas e das raízes e plante logo.'},
+ {t:'Irrigação',k:'rega regar irrigacao agua horario quantas vezes manha tarde encharcar',f:'Manual de mudas (Vale do Ribeira); Manual do Horto Rizzini; SENAR-PR',x:'Regue no começo da manhã e/ou no início da tarde; evite o fim da tarde, porque folha molhada à noite favorece fungos e bactérias. Na semeadura, use gotas finas para não descobrir as sementes. Plântulas e estacas em crescimento costumam ser regadas 2 vezes ao dia. Analise a qualidade da água e garanta drenagem: água parada no viveiro favorece doenças.'},
+ {t:'Manejo diário das mudas',k:'manejo monda daninha danca mudar lugar selecao descarte uniformizar limpeza ferramenta',f:'Manual de mudas (Vale do Ribeira); Embrapa Circular 47; Manual do Horto Rizzini',x:'Monda: tire o mato à mão sem desmanchar o torrão. Dança: mude os saquinhos de lugar para a raiz não pegar no chão e o lote crescer por igual. Troque sacos rasgados ou pequenos. Separe as mudas por tamanho e afaste as bem enfolhadas para ventilar. Descarte as muito doentes (são fonte de contágio). Lave as ferramentas, desinfete tubetes com água sanitária e solarize o substrato.'},
+ {t:'Prevenção de doenças no viveiro',k:'doenca prevenir estresse tombamento densidade fungo drenagem patogeno',f:'Embrapa Circular Técnica 47 (Estratégias de manejo de doenças em viveiros)',x:'Qualquer estresse (falta ou excesso de água e nutrientes, transplante mal feito, muda velha demais no saquinho) abre caminho para fungos. Sementeira muito densa ou semente enterrada fundo favorece tombamento. Mantenha drenagem, sombra na medida, material de propagação de boa qualidade e descarte mudas doentes.'},
+ {t:'Rustificação, padrão e transporte',k:'rustificacao rustificar pronta tamanho altura venda expedicao transporte caminhao',f:'Manual de mudas (Vale do Ribeira); Manual do Horto Rizzini',x:'Antes de vender, deixe as mudas cerca de 30 dias a pleno sol, reduzindo a rega aos poucos. O Horto Rizzini libera mudas com no mínimo 30 cm. No transporte, use carroceria fechada (baú), de preferência com prateleiras; em carroceria aberta as mudas ressecam e morrem.'},
+ {t:'Tempo de produção de nativas (exemplos)',k:'tempo producao dias meses crescimento lento rapido guanandi murici comandaiba palmeira',f:'Manual do Horto Carlos Toledo Rizzini (RJ)',x:'Exemplos do Horto Rizzini (semente até muda de 30 cm, com 30 dias de rustificação): guanandi ~250 dias; comandaíba ~300 dias; murici e baba-de-boi ~360 dias. Crescimento rápido: menos de 4 meses no viveiro; lento: 4 a 8 meses. Use isso para planejar quando semear para ter mudas prontas na época de maior venda.'},
+ {t:'Registro no RENASEM e legislação de mudas',k:'renasem legislacao registro mapa lei 10711 instrucao normativa responsavel tecnico legal regularizar',f:'Manual de mudas (Vale do Ribeira); Sebrae – Como montar um negócio de flores',x:'Quem produz e vende mudas precisa se inscrever no RENASEM (MAPA), pela internet, pagando taxa e indicando os grupos de espécies (ex.: ornamentais, florestais – Portaria MAPA 501/2022), com responsável técnico. Base legal: Lei 10.711/2003 e Decreto 10.586/2020. Para nativas, florestais ou de interesse ambiental, a IN MAPA 17/2017 criou procedimento simplificado para quem produz até 10.000 mudas/ano na própria área; nesse caso o responsável técnico pode ser outro profissional além de agrônomo ou engenheiro florestal, e o comércio ambulante é permitido. Agricultores familiares que só trocam ou vendem entre si dispensam registro; vender a terceiros exige. Confirme as regras atuais na Superintendência do MAPA do seu estado.'},
+ {t:'Nota fiscal e documentação',k:'nota fiscal inscricao estadual produtor rural vender formal documento servico',f:'Manual de mudas (Vale do Ribeira)',x:'Para vender, o produtor rural emite nota fiscal de produtor (simplificada). A inscrição estadual de produtor é gratuita na Secretaria da Fazenda, com documentos do imóvel, CPF e RG. Serviços (plantio, manutenção de jardim) não entram na nota de produtor: precisam de nota de serviço da prefeitura.'},
+ {t:'Custos fixos e variáveis',k:'custo fixo variavel despesa capital giro lucro financeiro controle gasto',f:'Sebrae – Ideia de negócio: floricultura',x:'Custos variáveis mudam com a produção (sementes, substrato, saquinhos, adubo, embalagem, frete). Custos fixos ficam iguais todo mês (aluguel, água, luz, internet, contador, mão de obra fixa). Controle desperdícios e perdas, compre bem e acompanhe o capital de giro: quanto menores os custos, maior o resultado. A Planejadora Financeira do Sebrae ajuda a simular.'},
+ {t:'Formação de preço e cadeia de valor',k:'preco precificar quanto cobrar margem markup atacado varejo valor venda',f:'Hórtica/Sebrae (5518); PDP Flores e Plantas Ornamentais (DF); catálogo Brasil Nativas',x:'Na cadeia das flores, se o produtor recebe 100, o atacado vende por ~150 e o varejo por ~350. No DF, atacadistas trabalham com margem média de 85% sobre a compra. Monte o custo unitário (semente ou matriz, substrato, recipiente, adubo, água, mão de obra rateada e as perdas) e some sua margem; compare com o mercado. Referências de lojas online de nativas: ipê-amarelo de 1 m ~R$ 78, jasmim-cachorro ~R$ 28, bromélia-imperial ~R$ 116 (preços anunciados, podem mudar).'},
+ {t:'Mercado de flores e plantas ornamentais',k:'mercado setor crescimento consumo cliente vendas tendencia faturamento',f:'Sebrae – Pesquisa de redes sociais (2023), dados Ibraflor e Cepea',x:'O setor cresceu 15% entre 2020 e 2021 e faturou R$ 10,9 bilhões (Ibraflor): decoração 30%, autosserviço (supermercados) 21% e paisagismo 20%. Consumo de cerca de R$ 51 por pessoa ao ano (Cepea, 2021). Lojas online, supermercados e garden centers ampliaram o acesso. As plantas ornamentais (suculentas, samambaia, zamioculca, ficus) são 24% das vendas.'},
+ {t:'Canais de venda',k:'vender canal cliente paisagista garden center feira online instagram whatsapp atacado',f:'PDP Flores e Plantas Ornamentais (DF); Sebrae – Pesquisa de redes sociais',x:'Canais possíveis: venda direta (feiras, no viveiro, WhatsApp e Instagram), paisagistas e jardineiros, garden centers e lojas, atacadistas informais (no DF respondem por 30–40% do faturamento do segmento), prefeituras e projetos de restauração. Nas redes, clientes procuram cuidados, plantas resistentes ao sol e onde comprar: fotos reais, dicas de cuidado e entrega ajudam a vender.'},
+ {t:'Nativas: nome científico e valor',k:'nativa nome cientifico popular especie restauracao fauna paisagismo sustentavel',f:'Manual de mudas (Vale do Ribeira); catálogos do projeto',x:'Use sempre o nome científico na venda e nas etiquetas: nomes populares mudam de região para região. Conheça cada espécie (porte, se é pioneira, época de flor e semente, se gosta de área úmida) e o uso final (paisagismo, restauração, arborização). Espécies atrativas de fauna são um argumento de venda forte no paisagismo sustentável.'},
+ {t:'Trabalho em rede',k:'rede cooperativa associacao parceria coletivo assistencia tecnica',f:'Manual de mudas (Vale do Ribeira)',x:'Redes de viveiristas (ex.: Rede de Viveiros de Mudas Nativas do Vale do Ribeira) ajudam com assistência técnica, regularização no RENASEM, divulgação, capacitação e planos de negócio. Ter as informações organizadas (fichas de coleta, produção e vendas) melhora as vendas e o acesso a projetos e políticas públicas.'}
+];
+function buscarConhecimento(pergunta,n=4){
+  const pal=semAcento(pergunta).toLowerCase().split(/\s+/).filter(w=>w.length>3);
+  if(!pal.length)return [];
+  const pont=t=>{const s=semAcento(t).toLowerCase();return pal.reduce((a,w)=>a+(s.includes(w.slice(0,Math.max(4,w.length-2)))?1:0),0)};
+  return CONHEC.map(c=>({c,p:pont(c.k)*2+pont(c.t)*2+pont(c.x)})).filter(x=>x.p>0).sort((a,b)=>b.p-a.p).slice(0,n).map(x=>x.c);
+}
+
+/* ============ ASSISTENTE GERAL DO VIVEIRO (gestão + manejo + base do projeto) ============ */
+let iaConversa=[],iaItemId='';
+function resumoGestao(){
+  const ev=ativos(S.eventos);const lotes=lotesAtivos();const meses=ultimosMeses(6);
+  const vend=ev.filter(e=>e.tipo==='venda');
+  const soma=(vs,f)=>vs.reduce((s,e)=>s+f(e),0);
+  const mesTxt=meses.map(m=>{const vs=vend.filter(e=>e.data.slice(0,7)===m.k);
+    return `${m.k}: ${vs.length} vendas, ${soma(vs,e=>num(e.qtd))} mudas, receita ${brl(soma(vs,e=>num(e.qtd)*num(e.precoUnit)))}, lucro bruto ${brl(soma(vs,e=>num(e.qtd)*(num(e.precoUnit)-num(e.custoUnit))))}`}).join('\n');
+  const v90=vend.filter(e=>diasDesde(e.data)<=90);const porEsp=new Map();
+  for(const e of v90){const it=itemPor(e.itemId);const n=it?nomeDe(it):'?';const x=porEsp.get(n)||{q:0,r:0,l:0};x.q+=num(e.qtd);x.r+=num(e.qtd)*num(e.precoUnit);x.l+=num(e.qtd)*(num(e.precoUnit)-num(e.custoUnit));porEsp.set(n,x)}
+  const pagto=new Map();for(const e of v90){const p=e.pagamento||'não informado';pagto.set(p,(pagto.get(p)||0)+num(e.qtd)*num(e.precoUnit))}
+  const fiado=vend.filter(e=>e.pagamento==='Fiado').slice(-15).map(e=>`${dataBR(e.data)} ${e.cliente||'sem nome'} ${brl(num(e.qtd)*num(e.precoUnit))}`).join('; ');
+  const lotesTxt=lotes.slice(0,45).map(l=>{const c=custoDe(l),p=precoDe(l);const dr=diasDesde(ultimoManejo(l,'rega')),da=diasDesde(ultimoManejo(l,'adubacao'));
+    return `${l.codigo} ${nomeDe(l)} | ${herda(l,'etapa')||'sem etapa'} | ${qtdTotal(l.id)} mudas | entrou há ${diasDesde(l.dataEntrada)} dias | custo ${brl(c)} preço ${brl(p)} margem ${p?Math.round(margem(p,c)*100)+'%':'—'} | rega há ${dr??'?'}d (a cada ${intervaloRega(l)}d) | adubação: ${da==null?'nunca':'há '+da+'d'} | local ${l.local||'—'}`}).join('\n');
+  const perdas=ev.filter(e=>e.tipo==='perda'&&diasDesde(e.data)<=90);
+  const entradas=ev.filter(e=>e.tipo==='entrada').reduce((s,e)=>s+num(e.qtd),0),perdasTot=ev.filter(e=>e.tipo==='perda').reduce((s,e)=>s+num(e.qtd),0);
+  const ag=agenda();
+  const estoqueVal=ativos(S.itens).reduce((s,i)=>s+qtdPropria(i.id)*precoDe(i),0),estoqueCusto=ativos(S.itens).reduce((s,i)=>s+qtdPropria(i.id)*custoDe(i),0);
+  return `HOJE: ${relogioTxt()}
+${S.cfg.sobreViveiro?'SOBRE O VIVEIRO (escrito pelo dono): '+S.cfg.sobreViveiro+'\n':''}ESTOQUE: ${lotes.reduce((s,l)=>s+qtdTotal(l.id),0)} mudas em ${lotes.length} lotes ativos; valor a preço de venda ${brl(estoqueVal)}; custo investido ${brl(estoqueCusto)}.
+Por etapa: ${estoquePorEtapa().map(x=>x.nome+' '+x.v).join(', ')||'—'}.
+LOTES ATIVOS (código | espécie | etapa | mudas | idade | custo/preço/margem por muda | rega | adubação | local):
+${lotesTxt||'nenhum'}
+VENDAS POR MÊS (últimos 6):
+${mesTxt}
+VENDAS POR ESPÉCIE (90 dias): ${[...porEsp].sort((a,b)=>b[1].r-a[1].r).map(([n,x])=>`${n}: ${x.q} mudas, ${brl(x.r)}, lucro ${brl(x.l)}`).join('; ')||'nenhuma'}
+FORMAS DE PAGAMENTO (90 dias): ${[...pagto].map(([p,v])=>p+' '+brl(v)).join(', ')||'—'}
+VENDAS NO FIADO (recentes): ${fiado||'nenhuma'}
+PERDAS: ${perdasTot} mudas no total (sobrevivência ${entradas?Math.round((1-perdasTot/entradas)*100)+'%':'—'}); últimos 90 dias: ${perdas.map(e=>`${num(e.qtd)} ${itemPor(e.itemId)?.codigo||''} (${e.nota||'sem motivo'})`).join('; ')||'nenhuma'}
+AGENDA DE HOJE: regar ${ag.rega.map(x=>x.l.codigo).join(', ')||'nada'}; adubar ${ag.adubo.map(x=>x.l.codigo).join(', ')||'nada'}; revisar pragas ${ag.revisar.map(o=>(itemPor(o.itemId)?.codigo||'')+' '+nomeProblema(o)).join(', ')||'nada'}; rustificação concluída ${ag.rustif.map(i=>i.codigo).join(', ')||'nenhuma'}
+PRAGAS/DOENÇAS ABERTAS: ${ocAbertas().map(o=>`${itemPor(o.itemId)?.codigo||''} ${nomeProblema(o)} (${SEV[o.severidade]?.[0]}, desde ${dataBR(o.data)})`).join('; ')||'nenhuma'}
+ESPÉCIES CADASTRADAS: ${ativos(S.especies).map(e=>`${e.nome} (${e.cientifico||'—'}, sigla ${e.sigla||'—'}, preço ${brl(e.precoVenda)}, ${e.tempoProducao||'tempo não informado'})`).join('; ')}`;
+}
+const IA_GERAL=`Você é o assistente do app "Caderno do Viveiro", de um viveiro de mudas ornamentais nativas no Brasil, e ajuda o dono na gestão inteira: estoque, vendas, financeiro, manejo, pragas e doenças, produção e regularização.
+Regras:
+- Responda em português do Brasil, curto, direto e prático. Use listas quando ajudar.
+- Para perguntas sobre o negócio, use SOMENTE os números de "DADOS DO VIVEIRO". Não invente valores; se faltar dado, diga o que registrar no app.
+- Para orientação técnica, prefira a "BASE DO PROJETO" e as receitas do guia; cite a fonte entre parênteses. Se usar conhecimento geral, diga que é orientação geral.
+- Agrotóxico só com receituário agronômico de profissional habilitado: nunca indique produto químico nem dose.
+- Sugira ações no app quando fizer sentido. O usuário confirma cada uma antes de salvar.
+Responda SOMENTE com JSON: {"resposta":"texto (pode usar **negrito** e listas com -)","acoes":[{"tipo":"abrir|regar|adubar|praga|venda|etapa|separar|novo_lote|tela","codigo":"código do lote quando houver","codigos":["para regar/adubar vários"],"problemaId":"id do guia quando tipo=praga","destino":"inicio|estoque|vendas|manejo|escanear|etiquetas|especies (tipo=tela)","rotulo":"texto curto do botão"}]}
+Use no máximo 4 ações e só com códigos que existem nos dados.`;
+function contextoTecnico(pergunta){
+  const base=buscarConhecimento(pergunta,4);
+  const q=semAcento(pergunta).toLowerCase();
+  const probs=BIBLIO.filter(p=>q.includes(semAcento(p.nome).toLowerCase().split(' ')[0])||semAcento(p.sinais).toLowerCase().split(/\W+/).filter(w=>w.length>5).some(w=>q.includes(w))).slice(0,3);
+  return `${base.length?'BASE DO PROJETO:\n'+base.map(c=>`[${c.t}] ${c.x} (Fonte: ${c.f})`).join('\n'):''}
+${probs.length?'GUIA DE PRAGAS/DOENÇAS DO APP:\n'+probs.map(p=>`${p.id} = ${p.nome}: sinais ${p.sinais} Prevenção: ${p.prev} Controles: ${p.ctrl.map(id=>receitaPor(id)?.nome).filter(Boolean).join(', ')}`).join('\n'):''}
+IDs do guia para tipo=praga: ${BIBLIO.map(p=>p.id).join(', ')}`;
+}
+async function perguntarAssistente(q,foto){
+  const it=itemPor(iaItemId);
+  const hist=iaConversa.slice(-6).map(m=>(m.quem==='eu'?'Dono: ':'Assistente: ')+m.txt).join('\n');
+  const texto=`DADOS DO VIVEIRO:\n${resumoGestao()}\n${it?'\nLOTE EM FOCO:\n'+contextoItem(it)+'\n':''}\n${contextoTecnico(q+' '+(it?nomeDe(it):''))}\n${hist?'\nCONVERSA ATÉ AQUI:\n'+hist+'\n':''}\nPERGUNTA: ${q||'Analise a foto: há problema de praga, doença, nutrição ou manejo?'}`;
+  return gemini({texto,imagem:foto,json:true,sistema:IA_GERAL});
+}
+function itemPorCod(c){return c?ativos(S.itens).find(i=>i.codigo.toUpperCase()===String(c).toUpperCase().replace(/\s/g,'')):null}
+function executarAcao(a){
+  const it=itemPorCod(a.codigo);const ids=(a.codigos||[a.codigo]).map(itemPorCod).filter(Boolean).map(i=>i.id);
+  const precisa=()=>{if(!it){toast('Não achei o lote '+(a.codigo||''));return false}return true};
+  switch(a.tipo){
+    case 'abrir':if(precisa())ir('item',it.id);break;
+    case 'regar':formManejoLote('rega',ids);break;
+    case 'adubar':formManejoLote('adubacao',ids);break;
+    case 'praga':if(precisa())formOcorrencia(it,probPor(a.problemaId)?a.problemaId:undefined);break;
+    case 'venda':if(precisa())formVenda(it);break;
+    case 'etapa':if(precisa())formEtapa(it);break;
+    case 'separar':if(precisa())formSeparar(it);break;
+    case 'novo_lote':formLote();break;
+    case 'tela':{const d=a.destino;if(['inicio','estoque','vendas','manejo','escanear'].includes(d))aba(d);else if(['etiquetas','especies'].includes(d))ir(d);break}
+    default:toast('Ação não reconhecida');
+  }
+}
+const SUGESTOES=['O que preciso fazer hoje no viveiro?','Como foram as vendas este mês?','Quais lotes têm margem baixa?','Quanto vale meu estoque?','Quem está me devendo no fiado?','Como preparo substrato para estacas?','Preciso me registrar no RENASEM?','Monte um plano de manejo para a semana'];
+function renderAssistente(el){
+  if(!iaPronta()){el.innerHTML=`<div class="card iavazio"><b>Assistente do viveiro (Gemini)</b><p>Pergunte sobre vendas, estoque, custos, manejo, pragas ou legislação. Ele lê os dados do app e a base técnica do seu projeto. Para ligar, você precisa de uma chave gratuita do Google AI Studio.</p><button class="btn pri" id="iaCfg">Configurar o assistente</button></div>`;
+    $('#iaCfg').onclick=()=>ir('ia');return}
+  const it=itemPor(iaItemId);
+  el.innerHTML=`<div id="iaLog" style="display:flex;flex-direction:column;gap:10px">${iaConversa.length?iaConversa.map((m,i)=>`<div class="iamsg ${m.quem}">${m.html}${(m.acoes||[]).length?`<div class="iaacoes">${m.acoes.map((a,j)=>`<button class="btn sm" data-ai="${i}:${j}">${esc(a.rotulo||a.tipo)}</button>`).join('')}</div>`:''}</div>`).join('')
+    :`<div class="card iavazio"><b>Pergunte qualquer coisa sobre o viveiro</b><p class="muted">Ele usa seus números (estoque, vendas, custos, perdas, agenda) e os manuais do projeto. Sugestões:</p><div class="chips" style="flex-wrap:wrap">${SUGESTOES.map(s=>`<button class="chip" data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div></div>`}</div>
+  <div class="card iabox">
+    <textarea id="iaPerg" placeholder="Escreva sua pergunta" aria-label="Pergunta"></textarea>
+    <div class="row" style="align-items:center">
+      <button type="button" class="btn sm" id="iaEsc">${it?`Lote ${esc(it.codigo)} ✕`:'Sobre um lote'}</button>
+      <label class="btn sm" for="iaFoto" id="iaFotoL">Foto</label><input id="iaFoto" type="file" accept="image/*" capture="environment" hidden>
+      ${iaConversa.length?'<button type="button" class="btn sm" id="iaLimpa">Nova conversa</button>':''}
+      <button class="btn pri" id="iaEnv" style="background:var(--purple);color:#fff;flex:1 1 120px">Perguntar</button></div></div>`;
+  $$('[data-sug]',el).forEach(b=>b.onclick=()=>{$('#iaPerg').value=b.dataset.sug;$('#iaEnv').click()});
+  $$('[data-ai]',el).forEach(b=>b.onclick=()=>{const [i,j]=b.dataset.ai.split(':').map(Number);executarAcao(iaConversa[i].acoes[j])});
+  $('#iaEsc').onclick=()=>{if(iaItemId){iaItemId='';render();return}escolherItem('Sobre qual lote ou muda?',x=>{iaItemId=x.id;render()},()=>true)};
+  $('#iaFoto').onchange=e=>{$('#iaFotoL').textContent=e.target.files[0]?'Foto ✓':'Foto'};
+  const lp=$('#iaLimpa');if(lp)lp.onclick=()=>{iaConversa=[];iaItemId='';render()};
+  $('#iaEnv').onclick=async()=>{const q=$('#iaPerg').value.trim(),f=$('#iaFoto').files[0];if(!q&&!f){toast('Escreva uma pergunta ou escolha uma foto');return}
+    const b=$('#iaEnv');b.disabled=true;b.textContent='Pensando…';
+    iaConversa.push({quem:'eu',txt:q||'(foto)',html:`${f?'<span class="pill ok">foto</span> ':''}${esc(q||'Analise a foto')}`});
+    try{const r=await perguntarAssistente(q,f);const t=String(r.resposta||'').trim()||'Sem resposta.';
+      iaConversa.push({quem:'ia',txt:t,html:mdSimples(t),acoes:Array.isArray(r.acoes)?r.acoes.slice(0,4):[]})}
+    catch(e){iaConversa.push({quem:'ia',txt:'',html:`<span class="txt-bad">${esc(e.message)}</span>`})}
+    render();setTimeout(()=>{const l=$$('.iamsg');if(l.length)l[l.length-1].scrollIntoView({block:'start',behavior:'smooth'})},60)};
+}
+function manejoIA(el){renderAssistente(el)}
+VIEWS.assistente=()=>{setTitulo('Assistente');const d=document.createElement('div');d.style.cssText='display:flex;flex-direction:column;gap:14px';$('#view').innerHTML='';$('#view').appendChild(d);renderAssistente(d)};
+
 /* ============ ESCANEAR: QR (rastreio) ou código de barras (venda) ============ */
 let modoScan=null,carrinho=[],pagCarrinho='Dinheiro',clienteCarrinho='';
 const PAGAMENTOS=['Dinheiro','Pix','Cartão de crédito','Cartão de débito','Fiado'];
@@ -1579,11 +1836,11 @@ VIEWS.mais=()=>{
     <button class="item" data-go="especies"><span class="tx"><strong>Espécies</strong><small>Nomes, cuidados e preço padrão (o cliente vê os cuidados)</small></span>›</button>
     <button class="item" data-go="etiquetas"><span class="tx"><strong>Etiquetas</strong><small>Nome, data de entrada e QR para a Niimbot B1</small></span>›</button>
     <button class="item" data-go="sync"><span class="tx"><strong>Sincronização com a planilha</strong><small>Google Planilhas e fotos no Drive</small></span>›</button>
+    <button class="item" data-go="ia"><span class="tx"><strong>Assistente de IA (Gemini)</strong><small>${iaPronta()?'Ligado · gestão, manejo, diagnóstico por foto':'Desligado · toque para configurar'}</small></span>›</button>
     <button class="item" data-go="backup"><span class="tx"><strong>Cópia de segurança</strong><small>Exportar ou restaurar todos os dados</small></span>›</button>
   </div>
   ${S.itens.some(i=>i.exemplo)?`<button class="btn warn" id="mEx">Apagar dados de exemplo</button>`:''}
-  <div class="card muted" style="font-size:14px">Assistente de IA (Gemini) para analisar fotos das mudas: chega na fase 2.</div>
-  <div class="muted" style="font-size:13px;text-align:center">Caderno do Viveiro · versão 3<br><span style="font-size:11px">Ícone da tesoura de poda: game-icons.net (CC BY 3.0)</span></div>`;
+  <div class="muted" style="font-size:13px;text-align:center">Caderno do Viveiro · versão 4<br><span style="font-size:11px">Ícone da tesoura de poda: game-icons.net (CC BY 3.0)</span></div>`;
   $$('[data-go]').forEach(b=>b.onclick=()=>ir(b.dataset.go));
   const bx=$('#mEx');if(bx)bx.onclick=async()=>{if(!bx.dataset.conf){bx.dataset.conf=1;bx.textContent='Toque de novo para apagar os exemplos';return}
     for(const t of TABS)for(const r of S[t].filter(x=>x.exemplo))await DB.del(t,r.id);
@@ -1836,7 +2093,7 @@ async function criarExemplos(){
 (async function iniciar(){
   await DB.open();await carregar();aplicarTema();
   const h=decodeURIComponent(location.hash||'');
-  if(h.startsWith('#c-')){publico=true;$('#tabs').hidden=true;$('#btnMais').hidden=true;$('#btnTema').hidden=true;document.querySelector('main').style.paddingBottom='32px';pintarSync();atual={v:'cliente',p:h.slice(3).toUpperCase()};render();return}
+  if(h.startsWith('#c-')){publico=true;$('#tabs').hidden=true;$('#btnMais').hidden=true;$('#btnTema').hidden=true;$('#btnIA').hidden=true;document.querySelector('main').style.paddingBottom='32px';pintarSync();atual={v:'cliente',p:h.slice(3).toUpperCase()};render();return}
   if(S.itens.some(i=>i.exemplo)&&S.cfg.exVer!==3){for(const t of TABS)for(const r of S[t].filter(x=>x.exemplo))await DB.del(t,r.id);await carregar();S.cfg.ultimoSerial=0}
   if(!S.itens.length&&!S.cfg.exemplosApagados&&!S.cfg.url){await criarExemplos();S.cfg.exVer=3;await salvarCfg()}
   pintarSync();render();
