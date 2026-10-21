@@ -129,6 +129,10 @@ label.f small{font-weight:400;color:var(--muted)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ck{display:flex;gap:10px;align-items:flex-start;font-size:15px}
 .ck input{width:22px;height:22px;min-height:0;flex:none;margin-top:1px}
+#mAuto{color:var(--teal);font-weight:700}
+.acaolote .ckl{display:flex;flex-direction:column;gap:2px}.acaolote .ckl .ck{padding:9px 4px;border-bottom:1px solid var(--line)}
+.acaolote .alsel{display:flex;flex-direction:column;gap:8px;position:sticky;top:-16px;background:var(--surface);padding:8px 0;z-index:2}
+.acaolote .alrod{position:sticky;bottom:calc(-16px - env(safe-area-inset-bottom,0px));background:var(--surface);padding:10px 0 4px;border-top:1px solid var(--line)}
 .sheet-bg{position:fixed;inset:0;background:rgba(10,15,12,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--surface);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:16px 16px 0 0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px calc(16px + env(safe-area-inset-bottom,0px))}
@@ -1161,7 +1165,7 @@ const eventosOc=oc=>ativos(S.eventos).filter(e=>e.ocorrenciaId===oc.id).sort((a,
 function lotesAtivos(){return ativos(S.itens).filter(i=>i.tipo==='lote'&&qtdTotal(i.id)>0)}
 function agenda(){
   const lotes=lotesAtivos();
-  const rega=lotes.map(l=>{const d=diasDesde(ultimoManejo(l,'rega'));const lim=intervaloRega(l);return {l,d,lim,atraso:d===null?999:d-lim}})
+  const rega=lotes.filter(l=>!regaAuto(l)).map(l=>{const d=diasDesde(ultimoManejo(l,'rega'));const lim=intervaloRega(l);return {l,d,lim,atraso:d===null?999:d-lim}})
     .filter(x=>x.d===null||x.d>=x.lim).sort((a,b)=>b.atraso-a.atraso);
   const adubo=lotes.filter(l=>!['Semeadura','Germinação'].includes(herda(l,'etapa'))).map(l=>{const u=ultimoManejo(l,'adubacao');return {l,d:diasDesde(u||l.dataEntrada),lim:intervaloAdubo(l),nunca:!u}})
     .filter(x=>x.d>=x.lim).sort((a,b)=>b.d-b.lim-(a.d-a.lim));
@@ -1311,8 +1315,9 @@ function manejoAgenda(el){
     <a href="#" data-pula="adubo" class="${ag.adubo.length?'tem':''}"><b>${ag.adubo.length}</b><span>adubar</span></a>
     <a href="#" data-pula="revisar" class="${ag.revisar.length?'tem bad':''}"><b>${ag.revisar.length}</b><span>revisar</span></a>
   </div>
-  <div class="row"><button class="btn pri add" id="mNovaOc">Praga ou doença</button><button class="btn" id="mAdubo">Adubar vários</button></div>
+  <div class="row"><button class="btn pri add" id="mNovaOc">Praga ou doença</button><button class="btn" id="mLote">Registrar em lote</button></div>
   <h2 id="ag-rega">Regar</h2>
+  ${S.cfg.regaAuto?.on?`<div class="card muted" style="font-size:14px">Irrigação automática ligada${(S.cfg.regaAuto.locais||[]).length?' em: '+S.cfg.regaAuto.locais.map(esc).join(', '):' em todos os locais'}. Esses lotes não aparecem aqui. <a href="#" id="mAuto">Ajustar</a></div>`:`<a href="#" id="mAuto" class="muted" style="font-size:14px">Minha irrigação é automática ›</a>`}
   <div class="list">${ag.rega.length?ag.rega.map(({l,d,lim})=>linhaLote(l,`<span class="pill ${d===null||d>lim?'bad':'warn'}">${d===null?'sem registro':d===0?'hoje':'há '+d+'d'}</span>`,` · a cada ${lim}d${['Semeadura','Germinação'].includes(herda(l,'etapa'))?' (2× ao dia)':''}`)).join('')
     :`<div class="empty">Todos os lotes estão em dia com a rega.</div>`}</div>
   ${ag.rega.length?`<button class="btn" id="mRega">Registrar rega destes ${ag.rega.length}</button>`:''}
@@ -1328,7 +1333,8 @@ function manejoAgenda(el){
   <div class="muted" style="font-size:13px">Intervalos: os da espécie (Mais › Espécies); sem isso, o da etapa (sementeira e repicagem: todo dia); senão, o padrão em Mais › Sincronização.</div>`;
   $$('[data-pula]',el).forEach(a=>a.onclick=e=>{e.preventDefault();$('#ag-'+a.dataset.pula).scrollIntoView({block:'start'})});
   $('#mNovaOc').onclick=()=>escolherItem('Onde está o problema?',it=>formOcorrencia(it),it=>!it.dataSaida);
-  $('#mAdubo').onclick=()=>formManejoLote('adubacao',ag.adubo.map(x=>x.l.id));
+  $('#mLote').onclick=()=>formManejoLote('rega');
+  $('#mAuto').onclick=e=>{e.preventDefault();formRegaAuto()};
   const r=$('#mRega');if(r)r.onclick=()=>formManejoLote('rega',ag.rega.map(x=>x.l.id));
   const a=$('#mAduboV');if(a)a.onclick=()=>formManejoLote('adubacao',ag.adubo.map(x=>x.l.id));
   ligarOc(el);
@@ -1510,21 +1516,67 @@ function formEtapa(it){
     it.etapa=e;it.dataEtapa=fd.get('data')||hoje();await salvar('itens',it);
     await salvar('eventos',{id:uid(),itemId:it.id,tipo:'etapa',estagio:e,data:it.dataEtapa+'T08:00',nota:'Passou para '+e});toast('Etapa: '+e);render()}});
 }
-function formManejoLote(tipo,marcados){
+/* ============ AÇÕES EM LOTE + IRRIGAÇÃO AUTOMÁTICA ============ */
+const ACOES_LOTE={rega:'Rega',adubacao:'Adubação',tratamento:'Tratamento',nota:'Anotação',etapa:'Etapa'};
+function regaAuto(it){const c=S.cfg.regaAuto;if(!c||!c.on)return false;const ls=c.locais||[];return !ls.length||ls.includes(herda(it,'local'))}
+function pendentesDe(tipo){const ag=agenda();return tipo==='rega'?ag.rega.map(x=>x.l.id):tipo==='adubacao'?ag.adubo.map(x=>x.l.id):[]}
+function infoLote(l,tipo){
+  if(tipo==='rega'){if(regaAuto(l))return 'irrigação automática';const d=diasDesde(ultimoManejo(l,'rega'));return d===null?'sem rega registrada':d===0?'regado hoje':'regado há '+d+'d'}
+  if(tipo==='adubacao'){const d=diasDesde(ultimoManejo(l,'adubacao'));return d===null?'nunca adubado':d===0?'adubado hoje':'adubado há '+d+'d'}
+  if(tipo==='etapa')return 'etapa: '+(herda(l,'etapa')||'sem etapa');
+  return herda(l,'etapa')||'sem etapa'}
+function formManejoLote(tipo='rega',marcados){
   const lotes=lotesAtivos().sort((a,b)=>a.codigo<b.codigo?-1:1);
   if(!lotes.length){toast('Nenhum lote com estoque');return}
-  const set=new Set(marcados);
-  folha(`<form><h3>${tipo==='rega'?'Registrar rega':'Registrar adubação'}</h3>
-    <label class="f">Data e hora<input name="data" type="datetime-local" value="${agoraLocal()}" required></label>
-    ${tipo==='adubacao'?`<label class="f">Produto e dose<input name="produto" placeholder="Ex.: NPK 10-10-10, 5 g/L"></label>`:''}
-    <div class="row"><button type="button" class="btn sm" id="todos">Marcar todos</button><button type="button" class="btn sm" id="nenhum">Desmarcar</button></div>
-    ${lotes.map(l=>`<label class="ck"><input type="checkbox" name="lote" value="${l.id}" ${set.has(l.id)?'checked':''}><span><b>${esc(l.codigo)}</b> · ${esc(nomeDe(l))} <span class="muted">${esc(l.local||'')}</span></span></label>`).join('')}
-    ${rodapeForm('Registrar')}</form>`,{
-    onOpen:bg=>{$('#todos',bg).onclick=()=>$$('input[name=lote]',bg).forEach(c=>c.checked=true);$('#nenhum',bg).onclick=()=>$$('input[name=lote]',bg).forEach(c=>c.checked=false)},
+  if(!ACOES_LOTE[tipo])tipo='rega';
+  const sel=new Set(marcados||pendentesDe(tipo));
+  const locais=[...new Set(lotes.map(l=>herda(l,'local')).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const esps=[...new Set(lotes.map(l=>nomeDe(l)))].sort((a,b)=>a.localeCompare(b));
+  const {bg}=folha(`<form class="acaolote"><h3>Registrar em lote</h3>
+    <div class="chips" id="alTipo">${Object.entries(ACOES_LOTE).map(([k,n])=>`<button type="button" class="chip" data-t="${k}">${n}</button>`).join('')}</div>
+    <div class="f2"><label class="f">Data e hora<input name="data" type="datetime-local" value="${agoraLocal()}" required></label><div id="alCampo"></div></div>
+    <label class="f" id="alNotaW">Observação <small>vale para todos</small><input name="nota" placeholder="Opcional"></label>
+    <div class="alsel"><span><b id="alCont">0</b> de ${lotes.length} lotes</span>
+      <div class="chips"><button type="button" class="chip" data-s="pend" id="alPend">Pendentes hoje</button><button type="button" class="chip" data-s="todos">Todos</button><button type="button" class="chip" data-s="nenhum">Nenhum</button>
+      ${locais.map(l=>`<button type="button" class="chip" data-loc="${esc(l)}">${esc(l)}</button>`).join('')}</div>
+      ${esps.length>1?`<select id="alEsp" aria-label="Marcar por espécie"><option value="">Marcar por espécie…</option>${esps.map(n=>`<option>${esc(n)}</option>`).join('')}</select>`:''}</div>
+    <div class="ckl">${lotes.map(l=>`<label class="ck"><input type="checkbox" name="lote" value="${l.id}" ${sel.has(l.id)?'checked':''}><span><b>${esc(l.codigo)}</b> · ${esc(nomeDe(l))}<br><small class="muted"><span>${esc(herda(l,'local')||'sem local')}</span> · <span data-info="${l.id}"></span></small></span></label>`).join('')}</div>
+    <div class="alrod"><div class="row"><button type="button" class="btn" data-fechar>Cancelar</button><button type="submit" class="btn pri" id="alOk">Registrar</button></div></div></form>`,{
+    onOpen:bg=>{const f=$('form',bg);const cks=()=>$$('input[name=lote]',bg);
+      const pintar=()=>{const n=cks().filter(c=>c.checked).length;$('#alCont',bg).textContent=n;
+        $('#alOk',bg).textContent=n?`Registrar ${ACOES_LOTE[tipo].toLowerCase()} em ${n} lote${n>1?'s':''}`:'Marque os lotes'};
+      const mudarTipo=t=>{tipo=t;$$('#alTipo .chip',bg).forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+        $('#alCampo',bg).innerHTML=t==='adubacao'||t==='tratamento'?`<label class="f">Produto e dose<input name="produto" placeholder="${t==='adubacao'?'Ex.: NPK 10-10-10, 5 g/L':'Ex.: óleo de neem 5 ml/L'}"></label>`
+          :t==='etapa'?`<label class="f">Nova etapa<select name="etapa" required><option value="">Escolha…</option>${ETAPAS.map(e=>`<option>${e}</option>`).join('')}</select></label>`
+          :t==='nota'?`<label class="f">Anotação<input name="nota2" required placeholder="O que foi feito ou observado"></label>`:'';
+        $('#alNotaW',bg).hidden=t==='nota';$('#alPend',bg).hidden=!(t==='rega'||t==='adubacao');
+        lotes.forEach(l=>{const s=$(`[data-info="${l.id}"]`,bg);if(s)s.textContent=infoLote(l,t)});pintar()};
+      $$('#alTipo .chip',bg).forEach(b=>b.onclick=()=>{mudarTipo(b.dataset.t);if(b.dataset.t==='rega'||b.dataset.t==='adubacao'){const p=new Set(pendentesDe(b.dataset.t));cks().forEach(c=>c.checked=p.has(c.value))}pintar()});
+      $$('[data-s]',bg).forEach(b=>b.onclick=()=>{const s=b.dataset.s;const p=new Set(pendentesDe(tipo));cks().forEach(c=>c.checked=s==='todos'?true:s==='nenhum'?false:p.has(c.value));pintar()});
+      $$('[data-loc]',bg).forEach(b=>b.onclick=()=>{const ids=new Set(lotes.filter(l=>herda(l,'local')===b.dataset.loc).map(l=>l.id));const cs=cks().filter(c=>ids.has(c.value));
+        const tudo=cs.every(c=>c.checked);cs.forEach(c=>c.checked=!tudo);pintar()});
+      const se=$('#alEsp',bg);if(se)se.onchange=()=>{const ids=new Set(lotes.filter(l=>nomeDe(l)===se.value).map(l=>l.id));cks().forEach(c=>{if(ids.has(c.value))c.checked=true});se.value='';pintar()};
+      cks().forEach(c=>c.onchange=pintar);mudarTipo(tipo)},
     onSubmit:async fd=>{const ids=fd.getAll('lote');if(!ids.length){toast('Marque ao menos um lote');return false}
-      for(const id of ids)await salvar('eventos',{id:uid(),itemId:id,tipo,data:fd.get('data'),produto:String(fd.get('produto')||''),nota:''});
-      toast(`${TIPOS[tipo]} registrada em ${ids.length} lote${ids.length>1?'s':''}`);render()}});
+      const data=fd.get('data'),nota=tipo==='nota'?String(fd.get('nota2')||'').trim():String(fd.get('nota')||'').trim();
+      if(tipo==='etapa'){const e=fd.get('etapa');if(!e){toast('Escolha a etapa');return false}
+        for(const id of ids){const it=itemPor(id);if(!it)continue;it.etapa=e;it.dataEtapa=data.slice(0,10);await salvar('itens',it);
+          await salvar('eventos',{id:uid(),itemId:id,tipo:'etapa',estagio:e,data,nota:'Passou para '+e+(nota?'. '+nota:'')})}}
+      else for(const id of ids)await salvar('eventos',{id:uid(),itemId:id,tipo,data,produto:String(fd.get('produto')||'').trim(),nota});
+      toast(`${ACOES_LOTE[tipo]} registrada em ${ids.length} lote${ids.length>1?'s':''}`);render()}});
 }
+function formRegaAuto(){
+  const c=S.cfg.regaAuto||{on:false,locais:[]};
+  const locais=[...new Set(ativos(S.itens).map(i=>herda(i,'local')).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  folha(`<form><h3>Irrigação automática</h3>
+    <div class="muted" style="font-size:14px">Com a irrigação automática ligada, o app para de cobrar a rega dos lotes desses locais (sai da agenda e do “hoje é dia de regar”). Rega manual extra continua podendo ser registrada.</div>
+    <label class="ck"><input type="checkbox" name="on" ${c.on?'checked':''}><span><b>Tenho irrigação automática</b></span></label>
+    ${locais.length?`<div class="muted" style="font-size:14px">Em quais locais? Sem nenhum marcado, vale para todos.</div>
+    ${locais.map(l=>`<label class="ck"><input type="checkbox" name="loc" value="${esc(l)}" ${(c.locais||[]).includes(l)?'checked':''}><span>${esc(l)}</span></label>`).join('')}`:''}
+    ${rodapeForm()}</form>`,{onSubmit:async fd=>{S.cfg.regaAuto={on:!!fd.get('on'),locais:fd.getAll('loc')};await salvarCfg();
+      toast(S.cfg.regaAuto.on?'Irrigação automática ligada':'Irrigação automática desligada');render()}});
+}
+
 const formRegaLote=m=>formManejoLote('rega',m);
 
 /* ============ ETIQUETA EM IMAGEM (50×30 mm) ============ */
@@ -1665,7 +1717,7 @@ VIEWS.estoque=()=>{
     <button data-m="todos" class="${filtroEst.mostrar==='todos'?'on':''}">Todos</button>
   </div>
   <div class="chips" id="chEt"><button class="chip ${!filtroEst.etapa?'on':''}" data-e="">Todas as etapas</button>${[...ETAPAS,'Sem etapa'].map(e=>`<button class="chip ${filtroEst.etapa===e?'on':''}" data-e="${e}">${e}</button>`).join('')}</div>
-  <button class="btn pri add" id="eNovo">Novo lote</button>
+  <div class="row"><button class="btn pri add" id="eNovo">Novo lote</button><button class="btn" id="eLote">Registrar em lote</button></div>
   <div class="muted" id="resEst" style="font-size:14px;margin-bottom:-6px"></div>
   <div class="list" id="lista"></div>`;
   const pintar=()=>{
@@ -1682,7 +1734,7 @@ VIEWS.estoque=()=>{
     const linha=(it,nivel)=>{const t=qtdTotal(it.id);const d=diasDesde(ultimoManejo(it,'rega'));
       return `<button class="item ${nivel===1?'sub':nivel===2?'sub2':''}" data-item="${it.id}">
       <span class="tag">${esc(it.codigo)}</span>
-      <span class="tx"><strong>${nivel?TIPO_ITEM[it.tipo]+' · ':''}${esc(nomeDe(it))}</strong><small>${esc(herda(it,'etapa')||'sem etapa')} · ${esc(it.local||'—')} · entrada ${dataCurta(it.dataEntrada)}${d!==null?' · regado há '+d+'d':''}</small></span>
+      <span class="tx"><strong>${nivel?TIPO_ITEM[it.tipo]+' · ':''}${esc(nomeDe(it))}</strong><small>${esc(herda(it,'etapa')||'sem etapa')} · ${esc(it.local||'—')} · entrada ${dataCurta(it.dataEntrada)}${regaAuto(it)?' · irrigação automática':d!==null?' · regado há '+d+'d':''}</small></span>
       <span class="qt">${t}<small>${t===1?'muda':'mudas'}</small></span></button>`};
     $('#lista').innerHTML=lotes.length?lotes.map(l=>{const fs=filhos(l.id);
       return linha(l,0)+fs.map(b=>linha(b,1)+(b.tipo==='bandeja'?filhos(b.id).slice(0,30).map(m=>linha(m,2)).join(''):'')).join('')}).join('')
@@ -1691,7 +1743,7 @@ VIEWS.estoque=()=>{
   };
   $('#busca').oninput=e=>{filtroEst.q=e.target.value;pintar()};
   $$('#segEst button').forEach(b=>b.onclick=()=>{filtroEst.mostrar=b.dataset.m;$$('#segEst button').forEach(x=>x.classList.toggle('on',x===b));pintar()});
-  $('#eNovo').onclick=()=>formLote();
+  $('#eLote').onclick=()=>formManejoLote('rega');$('#eNovo').onclick=()=>formLote();
   $$('#chEt button').forEach(b=>b.onclick=()=>{filtroEst.etapa=b.dataset.e;$$('#chEt button').forEach(x=>x.classList.toggle('on',x===b));pintar()});
   pintar();ligarFaixa();
 };
@@ -1712,7 +1764,7 @@ VIEWS.item=(id)=>{
   <div class="card ficha-head">
     <div class="row" style="align-items:center"><span class="tag">${esc(it.codigo)}</span>
       ${it.dataSaida?`<span class="pill bad">Saiu em ${dataBR(it.dataSaida)}</span>`:`<span class="pill ok">Ativo</span>`}
-      ${dr!==null?`<span class="pill ${dr>=intervaloRega(it)?'warn':'ok'}">Regado há ${dr}d</span>`:''}
+      ${regaAuto(it)?'<span class="pill ok">Irrigação automática</span>':dr!==null?`<span class="pill ${dr>=intervaloRega(it)?'warn':'ok'}">Regado há ${dr}d</span>`:''}
       ${et?`<span class="pill" style="background:var(--bg);color:var(--ink);border:1px solid var(--line)"><span class="dot" style="background:${ETAPA_INFO[et]?.cor||'var(--muted)'}"></span> ${esc(et)}</span>`:''}
       ${ocsAb.length?`<span class="pill bad">${ocsAb.length} praga/doença</span>`:''}</div>
     <h2>${esc(nomeDe(it))}</h2>${esp?.cientifico?`<em>${esc(esp.cientifico)}</em>`:''}
@@ -2121,7 +2173,7 @@ function resumoGestao(){
   const pagto=new Map();for(const e of v90){const p=e.pagamento||'não informado';pagto.set(p,(pagto.get(p)||0)+num(e.qtd)*num(e.precoUnit))}
   const fiado=vend.filter(e=>e.pagamento==='Fiado').slice(-15).map(e=>`${dataBR(e.data)} ${e.cliente||'sem nome'} ${brl(num(e.qtd)*num(e.precoUnit))}`).join('; ');
   const lotesTxt=lotes.slice(0,45).map(l=>{const c=custoDe(l),p=precoDe(l);const dr=diasDesde(ultimoManejo(l,'rega')),da=diasDesde(ultimoManejo(l,'adubacao'));
-    return `${l.codigo} ${nomeDe(l)} | ${herda(l,'etapa')||'sem etapa'} | ${qtdTotal(l.id)} mudas | entrou há ${diasDesde(l.dataEntrada)} dias | custo ${brl(c)} preço ${brl(p)} margem ${p?Math.round(margem(p,c)*100)+'%':'—'} | rega há ${dr??'?'}d (a cada ${intervaloRega(l)}d) | adubação: ${da==null?'nunca':'há '+da+'d'} | local ${l.local||'—'}`}).join('\n');
+    return `${l.codigo} ${nomeDe(l)} | ${herda(l,'etapa')||'sem etapa'} | ${qtdTotal(l.id)} mudas | entrou há ${diasDesde(l.dataEntrada)} dias | custo ${brl(c)} preço ${brl(p)} margem ${p?Math.round(margem(p,c)*100)+'%':'—'} | ${regaAuto(l)?'irrigação automática':`rega há ${dr??'?'}d (a cada ${intervaloRega(l)}d)`} | adubação: ${da==null?'nunca':'há '+da+'d'} | local ${l.local||'—'}`}).join('\n');
   const perdas=ev.filter(e=>e.tipo==='perda'&&diasDesde(e.data)<=90);
   const entradas=ev.filter(e=>e.tipo==='entrada').reduce((s,e)=>s+num(e.qtd),0),perdasTot=ev.filter(e=>e.tipo==='perda').reduce((s,e)=>s+num(e.qtd),0);
   const ag=agenda();
@@ -2379,7 +2431,7 @@ VIEWS.mais=()=>{
     <button class="item" data-go="backup"><span class="tx"><strong>Cópia de segurança</strong><small>Exportar ou restaurar todos os dados</small></span>›</button>
   </div>
   ${S.itens.some(i=>i.exemplo)?`<button class="btn warn" id="mEx">Apagar dados de exemplo</button>`:''}
-  <div class="muted" style="font-size:13px;text-align:center">Quintal da Mata · app do viveiro, versão 7<br><span style="font-size:11px">Ícone da tesoura de poda: game-icons.net (CC BY 3.0)</span></div>`;
+  <div class="muted" style="font-size:13px;text-align:center">Quintal da Mata · app do viveiro, versão 8<br><span style="font-size:11px">Ícone da tesoura de poda: game-icons.net (CC BY 3.0)</span></div>`;
   $$('[data-go]').forEach(b=>b.onclick=()=>ir(b.dataset.go));
   const bx=$('#mEx');if(bx)bx.onclick=async()=>{if(!bx.dataset.conf){bx.dataset.conf=1;bx.textContent='Toque de novo para apagar os exemplos';return}
     for(const t of TABS)for(const r of S[t].filter(x=>x.exemplo))await DB.del(t,r.id);
